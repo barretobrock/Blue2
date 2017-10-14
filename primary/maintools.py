@@ -23,29 +23,34 @@ class Paths:
         self.gatewaypi_ip = '192.168.0.5'
         # directories
         hostname = socket.gethostname()
-        if any([name in hostname for name in ['MacBook', 'buntu']]):
-            if 'MacBook' in hostname:
-                self.home_dir = os.path.abspath('/Users/barret/')
-            elif 'buntu' in hostname:
-                self.home_dir = os.path.abspath('/home/barretobrock/')
-            else:
-                ValueError('Unknown hostname: {}'.format(hostname))
+        self.home_dir = os.path.expanduser("~")
+        if 'macbook' in hostname.lower():
             self.home_dir = os.path.join(*[self.home_dir, 'Dropbox', 'Programming', 'Scripts'])
-        else:
-            self.home_dir = os.path.abspath('/home/pi')
+
         self.image_dir = os.path.join(self.home_dir, 'images')
-        self.lpbot_dir = os.path.join(self.home_dir, 'LPBOT')
-        self.data_dir = os.path.join(self.lpbot_dir, 'Data')
-        self.script_dir = os.path.join(self.lpbot_dir, 'Scripts')
-        self.log_dir = os.path.join(self.lpbot_dir, 'Logs')
+        self.data_dir = os.path.join(self.home_dir, 'data')
+        self.script_dir = os.path.join(self.home_dir, 'blue2')
+        self.log_dir = os.path.join(self.home_dir, 'logs')
         self.key_dir = os.path.join(self.home_dir, 'keys')
         # files
         self.dark_sky_api_path = os.path.join(self.key_dir, 'dark_sky_api.txt')
         self.pushbullet_api_path = os.path.join(self.key_dir, 'pushbullet_api.txt')
         # keys
-        with open(self.dark_sky_api_path) as f1, open(self.pushbullet_api_path) as f2:
-            self.dark_sky_api = f1.read().replace('\n', '')
-            self.pushbullet_api = f2.read().replace('\n', '')
+        self.key_dict = [
+            {
+                'name': 'darksky',
+                'key': '',
+                'path': self.dark_sky_api_path
+            }, {
+                'name': 'pushbullet',
+                'key': '',
+                'path': self.pushbullet_api_path
+            }
+        ]
+
+        for k in self.key_dict:
+            with open(k['path']) as f:
+                k['key'] = f.read().replace('\n', '')
 
 
 class DateTools:

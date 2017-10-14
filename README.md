@@ -14,7 +14,7 @@ As some scripts will attempt to pull or save information to certain directories,
 └───/blue2
 │   └───/camera
 │   └───/comm
-│   └───/global
+│   └───/primary
 │   └───/logging
 │   └───/sensors
 │   │   └───/temp
