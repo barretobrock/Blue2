@@ -4,6 +4,13 @@ A directory of scripts for every function from home automation to web-scraping.
 ## Requirements
 ### pushbullet
     `pip install pushbullet.py`
+### wireless (WIFI connection, scanner)
+    ```
+    # Preliminary update of setuptools may be necessary
+    sudo pip install --upgrade setuptools
+
+    sudo pip install wireless
+    ```
 ### OBD2
     `pip install obd2`
 

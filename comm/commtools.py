@@ -14,41 +14,60 @@ from smtplib import SMTP
 from pushbullet import PushBullet
 import time
 import datetime
+import socket
 import os
 import codecs
+from wireless import Wireless
 
 
-class DomoticzComm:
-    def __init__(self, server, port=8080):
-        self.server = server
-        self.port = port
-        self.prefix_url = 'http://{}:{}/json.htm?type=command'.format(self.server, self.port)
-        self.curl_type = 'Accept: application/json'
+class PBullet:
+    def __init__(self, api):
+        self.api = api
+        self.pb = PushBullet(self.api)
 
-    def switch_on(self, device_id):
-        url = '{}&param=switchlight&idx={}&switchcmd=On'.format(self.prefix_url, device_id)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+    def send_message(self, title, message):
+        # Send Pushbullet text notification
+        self.pb.push_note(title, message)
 
-    def switch_off(self, device_id):
-        url = '{}&param=switchlight&idx={}&switchcmd=Off'.format(self.prefix_url, device_id)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+    def send_address(self, title, address):
+        # Send address
+        self.pb.push_address(title, address)
 
-    def toggle_switch(self, device_id):
-        url = '{}&param=switchlight&idx={}&switchcmd=Toggle'.format(self.prefix_url, device_id)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+    def send_link(self, text, link):
+        # Send link
+        self.pb.push_link(text, link)
 
-    def send_sensor_data(self, device_id, value):
-        url = '{}&param=udevice&idx={}&nvalue=0&svalue={}'.format(self.prefix_url, device_id, value)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+    def send_img(self, filepath, title, filetype='image/png'):
+        with open(filepath, 'rb') as thing:
+            file_data = self.pb.upload_file(thing, title, file_type=filetype)
+        push = self.pb.push_file(**file_data)
 
-    def switch_group_off(self, group_id):
-        url = '{}&param=switchscene&idx={}&switchcmd=Off'.format(self.prefix_url, group_id)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
-    def switch_group_on(self, group_id):
-        url = '{}&param=switchscene&idx={}&switchcmd=On'.format(self.prefix_url, group_id)
-        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+class Inet:
+    """
+    Performs variety of internet connection tests
+    """
+    def __init__(self):
+        self.ip_addr = socket.gethostbyname(socket.gethostname())
+        self.w = Wireless()
 
+    def get_wifi_ssid(self):
+        return self.w.current()
+
+    def connect_ssid(self, ssid, passwd):
+        self.w.connect(ssid, passwd)
+
+    def ping_success(self, is_internal=False):
+        """Check if connected to internet"""
+        if is_internal:
+            host = "192.168.0.1"
+        else:
+            host = "8.8.8.8"
+        response = os.system("ping -c 1 {}".format(host))
+        if response == 0:
+            return True
+        else:
+            return False
 
 class Email:
     """
@@ -104,51 +123,38 @@ class Email:
             self.log.exception('Could not connect with email server.')
 
 
-class PBullet:
-    def __init__(self, api):
-        self.api = api
-        self.pb = PushBullet(self.api)
+class DomoticzComm:
+    def __init__(self, server, port=8080):
+        self.server = server
+        self.port = port
+        self.prefix_url = 'http://{}:{}/json.htm?type=command'.format(self.server, self.port)
+        self.curl_type = 'Accept: application/json'
 
-    def send_message(self, title, message):
-        # Send Pushbullet text notification
-        self.pb.push_note(title, message)
+    def switch_on(self, device_id):
+        url = '{}&param=switchlight&idx={}&switchcmd=On'.format(self.prefix_url, device_id)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
-    def send_address(self, title, address):
-        # Send address
-        self.pb.push_address(title, address)
+    def switch_off(self, device_id):
+        url = '{}&param=switchlight&idx={}&switchcmd=Off'.format(self.prefix_url, device_id)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
-    def send_link(self, text, link):
-        # Send link
-        self.pb.push_link(text, link)
+    def toggle_switch(self, device_id):
+        url = '{}&param=switchlight&idx={}&switchcmd=Toggle'.format(self.prefix_url, device_id)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
-    def send_img(self, filepath, title, filetype='image/png'):
-        with open(filepath, 'rb') as thing:
-            file_data = self.pb.upload_file(thing, title, file_type=filetype)
-        push = self.pb.push_file(**file_data)
+    def send_sensor_data(self, device_id, value):
+        url = '{}&param=udevice&idx={}&nvalue=0&svalue={}'.format(self.prefix_url, device_id, value)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+
+    def switch_group_off(self, group_id):
+        url = '{}&param=switchscene&idx={}&switchcmd=Off'.format(self.prefix_url, group_id)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
+
+    def switch_group_on(self, group_id):
+        url = '{}&param=switchscene&idx={}&switchcmd=On'.format(self.prefix_url, group_id)
+        subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
 
-class Camera:
-    def __init__(self):
-        pass
 
-    def capture_image(self, save_dir, res=(1280, 720), framerate=24, extra_text='', timestamp=True, vflip=False, hflip=False):
-        from picamera import PiCamera
-        # Captue image and return path of where it is saved
-        filename = '{}.png'.format(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
-        save_path = os.path.join(save_dir, filename)
-        camera = PiCamera()
-        camera.resolution = res
-        camera.framerate = framerate
-        cam_text = ''
-        camera.vflip = vflip
-        camera.hflip = hflip
-
-        if timestamp:
-            cam_text = '{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-        if extra_text is not '':
-            cam_text = '{}-{}'.format(extra_text, cam_text)
-        camera.annotate_text = cam_text
-        camera.capture(save_path)
-        return save_path
 
 
