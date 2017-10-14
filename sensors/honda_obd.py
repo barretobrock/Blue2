@@ -31,8 +31,8 @@ cmd_dict = {
 }
 
 prevtime = time.time()
-for k, v in cmd_dict:
-    response = connection.query(v)
-    print("Value for {}: {} in {:.3f} seconds".format(k, response.value, time.time() - prevtime))
+for d in cmd_dict.keys():
+    response = connection.query(cmd_dict.get(d))
+    print("Value for {}: {} in {:.3f} seconds".format(d, response.value, time.time() - prevtime))
     prevtime = time.time()
 
