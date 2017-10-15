@@ -2,6 +2,9 @@
 A directory of scripts for every function from home automation to web-scraping. 
 
 ## Requirements
+### File Permissions
+    Probably useful to give execute permissions to script
+    `chmod a+x foo.py`
 ### pushbullet
     `pip install pushbullet.py`
 ### wireless (WIFI connection, scanner)
