@@ -48,7 +48,7 @@ class Inet:
     Performs variety of internet connection tests
     """
     def __init__(self):
-        self.ip_addr = socket.gethostbyname(socket.gethostname())
+        self.ip_addr = self.get_ip_address()
         self.w = Wireless()
 
     def get_wifi_ssid(self):
@@ -56,6 +56,12 @@ class Inet:
 
     def connect_ssid(self, ssid, passwd):
         self.w.connect(ssid, passwd)
+
+    def get_ip_address(self):
+        response = os.popen('ifconfig').read()
+        txt_split = response[response.index('192.168.0'):response.index('192.168.0') + 15]
+        txt_split = txt_split[:txt_split.index(' ')]
+        return txt_split
 
     def ping_success(self, is_internal=False):
         """Check if connected to internet"""
