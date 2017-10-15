@@ -128,3 +128,4 @@ if is_engine_on(connection):
     # Save file
     chelp.ordered_dict_to_csv(result_dicts, save_path)
 
+logg.close()
