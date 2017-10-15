@@ -15,7 +15,7 @@ import base64
 
 
 class Paths:
-    def __init__(self):
+    def __init__(self, need_keys=False):
         # locations
         self.home_loc = '30.457344,-97.655014'
 
@@ -32,25 +32,26 @@ class Paths:
         self.script_dir = os.path.join(self.home_dir, 'blue2')
         self.log_dir = os.path.join(self.home_dir, 'logs')
         self.key_dir = os.path.join(self.home_dir, 'keys')
-        # files
-        self.dark_sky_api_path = os.path.join(self.key_dir, 'dark_sky_api.txt')
-        self.pushbullet_api_path = os.path.join(self.key_dir, 'pushbullet_api.txt')
-        # keys
-        self.key_dict = [
-            {
-                'name': 'darksky',
-                'key': '',
-                'path': self.dark_sky_api_path
-            }, {
-                'name': 'pushbullet',
-                'key': '',
-                'path': self.pushbullet_api_path
-            }
-        ]
+        if need_keys:
+	    # files
+            self.dark_sky_api_path = os.path.join(self.key_dir, 'dark_sky_api.txt')
+            self.pushbullet_api_path = os.path.join(self.key_dir, 'pushbullet_api.txt')
+            # keys
+            self.key_dict = [
+                {
+                    'name': 'darksky',
+                    'key': '',
+                    'path': self.dark_sky_api_path
+                }, {
+                    'name': 'pushbullet',
+                    'key': '',
+                    'path': self.pushbullet_api_path
+                }
+            ]
 
-        for k in self.key_dict:
-            with open(k['path']) as f:
-                k['key'] = f.read().replace('\n', '')
+            for k in self.key_dict:
+                with open(k['path']) as f:
+                    k['key'] = f.read().replace('\n', '')
 
 
 class DateTools:
@@ -88,7 +89,7 @@ class CSVHelper:
                 list_out.append(OrderedDict(zip(keys, row)))
         return list_out
 
-    def ordered_dict_to_csv(self, data_dict, path_to_csv, writetype='w', encoding='UTF-8'):
+    def ordered_dict_to_csv(self, data_dict, path_to_csv, writetype='w'):
         # saves list of list of ordered dicts to path
         # determine how deep to go: if list of lists, etc
         islistoflist = False
@@ -96,7 +97,7 @@ class CSVHelper:
             if isinstance(data_dict[0][0], OrderedDict):
                 islistoflist = True
 
-        with open(path_to_csv, writetype, encoding=encoding) as f:
+        with open(path_to_csv, writetype) as f:
             if islistoflist:
                 keys = data_dict[0][0].keys()
             else:

@@ -21,9 +21,11 @@ from primary.maintools import CSVHelper, Paths
 
 def is_engine_on(conn):
     response = conn.query(obd.commands.RPM)
-    rval = response.value.magnitude
+    rval = response.value
     if rval is None:
         rval = 0
+    else:
+	rval = rval.magnitude
     if rval > 0:
         return True
     return False
@@ -85,22 +87,30 @@ cmd_list = [
 
 result_dicts = []
 i = 1
-while is_engine_on(connection) or i < 10:
+while is_engine_on(connection) and i < 3:
     print('Beginning new line...')
     line_dict = OrderedDict(())
     for d in cmd_list:
-        response = connection.query(obd.commands[d])
-        rval = response.value.magnitude
-        if rval is None:
+	print('Working on {}.'.format(d))
+        try:
+	    response = connection.query(obd.commands[d])
+	    rval = response.value
+	except:
+	    rval = None
+	    pass
+
+	if rval is None:
             rval = 0
+	else:
+	    rval = response.value.magnitude
         # Append to dictionary
         line_dict[d] = rval
 
     # Append line of data to main dictionary
     result_dicts.append(line_dict)
     # Wait a second before continuing
-    print('Results written to dict, waiting 5 seconds...')
-    time.sleep(5)
+    print('Results written to dict, waiting 2 seconds...')
+    time.sleep(2)
     i += 1
 
 print('Loop ended. Writing file.')
