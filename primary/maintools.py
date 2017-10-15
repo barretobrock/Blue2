@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 General tools used throughout a majority of scripts:
     * Absolute paths

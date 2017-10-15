@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Tools used for makeing HTML files and the formatting and graphing within
 """

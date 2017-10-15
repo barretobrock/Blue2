@@ -2,27 +2,28 @@
 A directory of scripts for every function from home automation to web-scraping. 
 
 ## Requirements
+### Python Version
+    As of now, most files are tested using primarily Python 3.4 (for Raspbian distro)
+
 ### File Permissions
     Probably useful to give execute permissions to script
     `chmod a+x foo.py`
+
 ### pushbullet
-    `pip install pushbullet.py`
+    `sudo pip3 install pushbullet.py`
+
 ### wireless (WIFI connection, scanner)
     ```
     # Preliminary update of setuptools may be necessary
-    sudo pip install --upgrade setuptools
+    sudo pip3 install --upgrade setuptools
 
-    sudo pip install wireless
+    sudo pip3 install wireless
     ```
 ### OBD2
     ```
     # Make sure python-dev or python3-dev are installed
-    sudo apt-get install python-dev
+    sudo apt-get install python3-dev
     sudo apt-get install libbluetooth-dev
-
-    # Clone repo to RasPi and install with setup script
-    git clone https://path/to/obdython_repo
-    python setup.py install
 
     # Check connection to bluetooth device
     # In shell:
