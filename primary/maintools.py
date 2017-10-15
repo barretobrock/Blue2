@@ -15,12 +15,14 @@ import base64
 
 
 class Paths:
-    def __init__(self, need_keys=False):
+    def __init__(self):
         # locations
         self.home_loc = '30.457344,-97.655014'
 
         # ip addresses
         self.gatewaypi_ip = '192.168.0.5'
+        self.server_ip = '192.168.0.10'
+        self.server_hostname = 'barretobrock'
         # directories
         hostname = socket.gethostname()
         self.home_dir = os.path.expanduser("~")
@@ -32,26 +34,22 @@ class Paths:
         self.script_dir = os.path.join(self.home_dir, 'blue2')
         self.log_dir = os.path.join(self.home_dir, 'logs')
         self.key_dir = os.path.join(self.home_dir, 'keys')
-        if need_keys:
-	    # files
-            self.dark_sky_api_path = os.path.join(self.key_dir, 'dark_sky_api.txt')
-            self.pushbullet_api_path = os.path.join(self.key_dir, 'pushbullet_api.txt')
-            # keys
-            self.key_dict = [
-                {
-                    'name': 'darksky',
-                    'key': '',
-                    'path': self.dark_sky_api_path
-                }, {
-                    'name': 'pushbullet',
-                    'key': '',
-                    'path': self.pushbullet_api_path
-                }
-            ]
+        # filepaths
+        self.ip_path = os.path.join(self.key_dir, 'myip.txt')
 
-            for k in self.key_dict:
-                with open(k['path']) as f:
-                    k['key'] = f.read().replace('\n', '')
+        # key filepaths
+        file_list = [
+            'darksky_api.txt',
+            'pushbullet_api.txt'
+        ]
+
+        self.key_dict = {}
+
+        for tfile in file_list:
+            fpath = os.path.join(self.key_dir, tfile)
+            if os.path.isfile(fpath):
+                with open(fpath) as f:
+                    self.key_dict[tfile.replace('.txt', '')] = f.read().replace('\n', '')
 
 
 class DateTools:
@@ -66,7 +64,8 @@ class DateTools:
         return datetime.datetime.strptime(datestring, strftime_string)
 
     def string_to_unix(self, date_string, strftime_string='%Y%m%d'):
-        unix = (datetime.datetime.strptime(date_string, strftime_string) - datetime.datetime(1970, 1, 1)).total_seconds()
+        unix = (
+        datetime.datetime.strptime(date_string, strftime_string) - datetime.datetime(1970, 1, 1)).total_seconds()
         return unix * 1000
 
     def unix_to_string(self, unix_date, output_fmt='%Y-%m-%d'):
@@ -102,7 +101,8 @@ class CSVHelper:
                 keys = data_dict[0][0].keys()
             else:
                 keys = data_dict[0].keys()
-            writer = csv.DictWriter(f, fieldnames=keys, extrasaction='ignore', delimiter=self.delimiter, lineterminator=self.lineterminator)
+            writer = csv.DictWriter(f, fieldnames=keys, extrasaction='ignore', delimiter=self.delimiter,
+                                    lineterminator=self.lineterminator)
             # If appending, don't write a header string
             if writetype == 'w':
                 writer.writeheader()

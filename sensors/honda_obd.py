@@ -14,27 +14,34 @@ blue2_dir = os.path.join(home_dir, 'blue2')
 if blue2_dir not in sys.path:
     sys.path.append(blue2_dir)
 import obd
+from datetime import datetime as dt
 import time
 from collections import OrderedDict
 from primary.maintools import CSVHelper, Paths
+from logger.pylogger import Log
 
 
 def is_engine_on(conn):
-    response = conn.query(obd.commands.RPM)
-    rval = response.value
+    try:
+        response = conn.query(obd.commands.RPM)
+        rval = response.value.magnitude
+    except:
+        rval = 0
+
     if rval is None:
         rval = 0
-    else:
-	rval = rval.magnitude
+
     if rval > 0:
         return True
     return False
 
 chelp = CSVHelper()
 p = Paths()
+logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
+logg.debug('Logging initiated')
 connection = obd.OBD()
 
-save_path = os.path.join(p.data_dir, 'obd_results.csv')
+save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
 cmd_list = [
     'RUN_TIME',
@@ -86,33 +93,38 @@ cmd_list = [
 ]
 
 result_dicts = []
-i = 1
-while is_engine_on(connection) and i < 3:
-    print('Beginning new line...')
-    line_dict = OrderedDict(())
-    for d in cmd_list:
-	print('Working on {}.'.format(d))
-        try:
-	    response = connection.query(obd.commands[d])
-	    rval = response.value
-	except:
-	    rval = None
-	    pass
+t = time.time()
+end_time = t + 60 * 5   # Run for five minutes
+if is_engine_on(connection):
+    # If engine is on, being recording...
 
-	if rval is None:
-            rval = 0
-	else:
-	    rval = response.value.magnitude
-        # Append to dictionary
-        line_dict[d] = rval
+    while is_engine_on(connection) and t < end_time:
+        print('Beginning new line...')
+        line_dict = OrderedDict(())
+        line_dict['TIMESTAMP'] = dt.now().isoformat()
+        for d in cmd_list:
+            print('Working on {}.'.format(d))
+            try:
+                response = connection.query(obd.commands[d])
+                rval = response.value.magnitude
+            except:
+                rval = None
+                pass
 
-    # Append line of data to main dictionary
-    result_dicts.append(line_dict)
-    # Wait a second before continuing
-    print('Results written to dict, waiting 2 seconds...')
-    time.sleep(2)
-    i += 1
+            if rval is None:
+                rval = 0
 
-print('Loop ended. Writing file.')
-# Save file
-chelp.ordered_dict_to_csv(result_dicts, save_path)
+            # Append to dictionary
+            line_dict[d] = rval
+
+        # Append line of data to main dictionary
+        result_dicts.append(line_dict)
+        # Wait a second before continuing
+        logg.debug('Results written to dict... Waiting...')
+        time.sleep(1)
+        t = time.time()
+
+    logg.debug('Loop ended. Writing file.')
+    # Save file
+    chelp.ordered_dict_to_csv(result_dicts, save_path)
+
