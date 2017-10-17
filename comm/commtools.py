@@ -53,7 +53,7 @@ class Inet:
         self.ip_addr = self.get_ip_address()
         self.w = Wireless()
 
-    def get_wifi_ssid(self):
+    def get_ssid(self):
         return self.w.current()
 
     def connect_ssid(self, ssid, passwd):

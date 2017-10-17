@@ -14,21 +14,12 @@ if '__file__' in globals():
 else:
     # otherwise set system paths based on project directory in PyCharm
     sys.path.insert(0, cur_dir)
+<<<<<<< HEAD
 # import custom modules
-from primary.maintools import Paths
-from sensors.sensortools import TempSensor
-from comm.commtools import DomoticzComm
+=======
+from comm.commtools import Inet
 
 
-p = Paths()
-dc = DomoticzComm(p.mainpi_ip)
-tsensor = TempSensor('Dallas')
-# Serial number of temp sensor
-sensor_serial = '28-0000079aefc4'
-# ID of sensor in Domoticz
-sensor_id = 8
-
-temp_dict = tsensor.measurement(sensor_serial)
-temp = temp_dict['temp']
-
-dc.send_sensor_data(sensor_id, temp)
+w = Inet()
+print(w.get_wifi_ssid())
+>>>>>>> 24e2c23ef7c576937bf44f68967c313c882f85a3
