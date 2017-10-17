@@ -16,3 +16,8 @@ if '__file__' in globals():
 else:
     # otherwise set system paths based on project directory in PyCharm
     sys.path.insert(0, cur_dir)
+from comm.commtools import Inet
+
+
+w = Inet()
+print(w.get_wifi_ssid())
