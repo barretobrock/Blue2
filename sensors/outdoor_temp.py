@@ -13,7 +13,7 @@ if '__file__' in globals():
     sys.path.insert(0, os.path.join(parent_dir, 'blue2'))
 else:
     # otherwise set system paths based on project directory in PyCharm
-    sys.path.insert(0, cur_dir)
+    sys.path.insert(0, os.path.join(cur_dir, *['Scripts', 'blue2']))
 # import custom modules
 from primary.maintools import Paths
 from sensors.sensortools import TempSensor

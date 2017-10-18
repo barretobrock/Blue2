@@ -12,6 +12,14 @@ A directory of scripts for every function from home automation to web-scraping.
 ### pushbullet
     `sudo pip3 install pushbullet.py`
 
+### pandas (installed on home server computer, for now)
+    `sudo apt-get install python3-pandas`
+
+### Google Client Library and support modules (installed on home server computer for now)
+    `sudo pip3 install --upgrade google-api-python-client`
+    'sudo pip3 install gspread oauth2client'
+    - Follow instructions from [this link](https://www.twilio.com/blog/2017/02/an-easy-way-to-read-and-write-to-a-google-spreadsheet-in-python.html)
+
 ### wireless (WIFI connection, scanner)
     ```
     # Preliminary update of setuptools may be necessary

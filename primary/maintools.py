@@ -36,6 +36,7 @@ class Paths:
         self.log_dir = os.path.join(self.home_dir, 'logs')
         self.key_dir = os.path.join(self.home_dir, 'keys')
         # filepaths
+        self.google_client_secret = os.path.join(self.key_dir, 'client_secret.json')
         self.ip_path = os.path.join(self.key_dir, 'myip.txt')
 
         # key filepaths
