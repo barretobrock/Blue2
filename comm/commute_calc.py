@@ -124,11 +124,11 @@ if last_update < last_entry:
     #    for j in range(daily_commute_df.shape[1]):
 
     # Notify of my recent commute time
-    latest_entry = commute_df[commute_df['timestamp'] == max(commute_df['timestamp'])]
+    latest_entry = commute_df[commute_df['timestamp'] == max(commute_df['timestamp'])].iloc[0]
     today_df = daily_commute_df[daily_commute_df['date'] == now.date()]
     msg = ''
 
-    if all([latest_entry['activity'] == 'arrived', latest_entry['Location'] == 'BAO_WORK']):
+    if latest_entry['activity'] == 'arrived' and latest_entry['Location'] == 'BAO_WORK':
         # Just arrived at work, analyze commute times
         avg_commute = daily_commute_df[(daily_commute_df['work_commute'] > 0) & (-daily_commute_df['adjusted_work_commute'])][
                 'work_commute'].mean()
@@ -142,7 +142,7 @@ if last_update < last_entry:
         ------------------------
         Difference: {:+7.2f} mins
         """.format(commute_time, avg_commute, commute_diff)
-    elif all([latest_entry['activity'] == 'left', latest_entry['Location'] == 'BAO_WORK']):
+    elif latest_entry['activity'] == 'left' and latest_entry['Location'] == 'BAO_WORK':
         # Just arrived at work, analyze commute times
         avg_commute = daily_commute_df[(daily_commute_df['hours_at_work'] > 0)]['hours_at_work'].mean()
         commute_time = today_df['hours_at_work'].iloc[0]
@@ -155,7 +155,7 @@ if last_update < last_entry:
         ------------------------
         Difference: {:+5.2f} hrs
         """.format(commute_time, avg_commute, commute_diff)
-    elif all([latest_entry['activity'] == 'arrived', latest_entry['Location'] == 'HOME']):
+    elif latest_entry['activity'] == 'arrived' and latest_entry['Location'] == 'HOME':
         # Just arrived at work, analyze commute times
         avg_commute = daily_commute_df[(daily_commute_df['home_commute'] > 0) & (-daily_commute_df['adjusted_home_commute'])][
                 'home_commute'].mean()
