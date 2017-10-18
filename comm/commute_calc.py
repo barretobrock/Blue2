@@ -17,6 +17,7 @@ else:
 # import custom modules
 from primary.maintools import Paths
 from comm.commtools import PBullet
+from logger.pylogger import Log
 import gspread
 from collections import OrderedDict
 from oauth2client.service_account import ServiceAccountCredentials
@@ -43,6 +44,8 @@ def seconds_since_midnight(timestamp):
 
 p = Paths()
 pb = PBullet(p.key_dict['pushbullet_api'])
+logg = Log('commute.calculator', p.log_dir, 'commute', log_lvl="DEBUG")
+logg.debug('Log initiated')
 client_secret_path = p.google_client_secret
 
 csv_save_path = os.path.join(p.data_dir, 'commute_calculations.csv')
@@ -174,4 +177,4 @@ if last_update < last_entry:
     # Update cell with timestamp
     processed_sheet.update_cell(1, 2, pd.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-
+logg.close()
