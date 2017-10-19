@@ -42,6 +42,55 @@ def seconds_since_midnight(timestamp):
     seconds = (timestamp - timestamp.replace(hour=0, minute=0, second=0)).total_seconds()
     return seconds
 
+
+def message_generator(activity_type, **kwargs):
+    if 'work_commute' == activity_type:
+        msg_dict = {
+            'wow': 'Woah!',
+            'activity': 'got to work',
+            'support': 'Good Job',
+            'metric': 'Commute Time:',
+            'unit': 'mins'
+        }
+    elif 'home_commute' == activity_type:
+        msg_dict = {
+            'wow': 'Cool!',
+            'activity': 'got home',
+            'support': 'Great',
+            'metric': 'Commute Time:',
+            'unit': 'mins'
+        }
+    elif 'hours_at_work' == activity_type:
+        msg_dict = {
+            'wow': 'Woah!',
+            'activity': 'left work',
+            'support': 'Super',
+            'metric': 'Hours at Work:',
+            'unit': 'hrs'
+        }
+    else:
+        msg_dict = {
+            'wow': 'Huh!',
+            'activity': 'not sure what you did',
+            'support': 'Still ok though',
+            'metric': '?:',
+            'unit': '?s'
+        }
+    msg_dict['avgmetric'] = 'Average:'
+    msg_dict['diff'] = 'Difference:'
+    for k, v in kwargs.items():
+        msg_dict[k] = v
+
+
+    msg = """
+    {wow} You just {activity}! {support}! Here are your stats:
+    {metric:<14} {current:>6.2f} {unit}
+    {avgmetric:<14} {average:>6.2f} {unit}
+    -----------------------------------
+    {diff:<14} {change:>+6.2f} {unit}
+    """.format(**msg_dict)
+    return msg
+
 p = Paths()
 pb = PBullet(p.key_dict['pushbullet_api'])
 logg = Log('commute.calculator', p.log_dir, 'commute', log_lvl="DEBUG")
@@ -71,6 +120,7 @@ commute_df['timestamp'] = pd.to_datetime(commute_df['Raw_date'], format='%B %d, 
 last_entry = max(commute_df['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
 
 if last_update < last_entry:
+    logg.debug('New log found.')
     # New entry found, rerun calculations
     now = pd.datetime.now()
     # Refactor arrival/departure column
@@ -117,6 +167,7 @@ if last_update < last_entry:
             daily_commute_df.iloc[i] = row
 
     # Save csv file
+    logg.debug('Writing to csv.')
     daily_commute_df.to_csv(csv_save_path)
 
     # Loop through daily_commute_df and add to processed sheet
@@ -135,26 +186,14 @@ if last_update < last_entry:
         commute_time = today_df['work_commute'].iloc[0]
         commute_diff = commute_time - avg_commute
         # Generate message
-        msg = """
-        Woah! You just got to work! Awesome! Here are your stats:\n
-        Commute Time: {:.2f} mins
-        Average: {:10.2f} mins
-        ------------------------
-        Difference: {:+7.2f} mins
-        """.format(commute_time, avg_commute, commute_diff)
+        msg = message_generator('work_commute', current=commute_time, average=avg_commute, change=commute_diff)
     elif latest_entry['activity'] == 'left' and latest_entry['Location'] == 'BAO_WORK':
         # Just arrived at work, analyze commute times
         avg_commute = daily_commute_df[(daily_commute_df['hours_at_work'] > 0)]['hours_at_work'].mean()
         commute_time = today_df['hours_at_work'].iloc[0]
         commute_diff = commute_time - avg_commute
         # Generate message
-        msg = """
-        Woah! You just left work! Awesome! Here are your stats:\n
-        Work Time: {:6.2f} hrs
-        Average: {:8.2f} hrs
-        ------------------------
-        Difference: {:+5.2f} hrs
-        """.format(commute_time, avg_commute, commute_diff)
+        msg = message_generator('hours_at_work', current=commute_time, average=avg_commute, change=commute_diff)
     elif latest_entry['activity'] == 'arrived' and latest_entry['Location'] == 'HOME':
         # Just arrived at work, analyze commute times
         avg_commute = daily_commute_df[(daily_commute_df['home_commute'] > 0) & (-daily_commute_df['adjusted_home_commute'])][
@@ -162,17 +201,12 @@ if last_update < last_entry:
         commute_time = today_df['home_commute'].iloc[0]
         commute_diff = commute_time - avg_commute
         # Generate message
-        msg = """
-        Woah! You just got home! Awesome!
-        Here are your stats:\n
-        Commute: {:5.2f} mins
-        Average: {:10.2f} mins
-        -----------------------------------
-        Difference: {:+7.2f} mins
-        """.format(commute_time, avg_commute, commute_diff)
+        msg = message_generator('home_commute', current=commute_time, average=avg_commute, change=commute_diff)
 
     if msg != '':
-        pb.send_message('Commute Calculations', msg)
+        logg.debug('Sending notification')
+        pb.send_message('Commute Notification', msg)
+
 
     # Update cell with timestamp
     processed_sheet.update_cell(1, 2, pd.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
