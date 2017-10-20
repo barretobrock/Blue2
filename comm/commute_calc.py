@@ -43,6 +43,25 @@ def seconds_since_midnight(timestamp):
     return seconds
 
 
+def get_metrics(df, todaydf, col_name, incl_adjusted):
+    filtered_df = df[(df[col_name] > 0)]
+    if not incl_adjusted:
+        adj_col_name = 'adjusted_' + col_name
+        if adj_col_name in filtered_df.columns:
+            filtered_df = filtered_df[(-filtered_df[adj_col_name])]
+
+    filtered_metric = filtered_df[col_name]
+
+    metric_dict = {
+        'current': todaydf[col_name].iloc[0],
+        'metricmean': filtered_metric.mean(),
+        'metricmin': filtered_metric.min(),
+        'metricmax': filtered_metric.max(),
+    }
+    metric_dict['difference'] = metric_dict['current'] - metric_dict['metricmean']
+    return metric_dict
+
+
 def message_generator(activity_type, **kwargs):
     if 'work_commute' == activity_type:
         msg_dict = {
@@ -76,8 +95,10 @@ def message_generator(activity_type, **kwargs):
             'metric': '?:',
             'unit': '?s'
         }
-    msg_dict['avgmetric'] = 'Average:'
-    msg_dict['diff'] = 'Difference:'
+    msg_dict['minmetric'] = 'Min:'
+    msg_dict['avgmetric'] = '*Average:'
+    msg_dict['maxmetric'] = 'Max:'
+    msg_dict['diff'] = '*Difference:'
     for k, v in kwargs.items():
         msg_dict[k] = v
 
@@ -85,12 +106,17 @@ def message_generator(activity_type, **kwargs):
     msg = """
     {wow} You just {activity}! {support}! Here are your stats:
     {metric:<14} {current:>6.2f} {unit}
-    {avgmetric:<14} {average:>6.2f} {unit}
+    {avgmetric:<14} {metricmean:>6.2f} {unit}
     -----------------------------------
-    {diff:<14} {change:>+6.2f} {unit}
+    {diff:<14} {difference:>+6.2f} {unit}
+    -----------------------------------
+    More Info:
+    {minmetric:<14} {metricmin:>6.2f} {unit}
+    {maxmetric:<14} {metricmax:>6.2f} {unit}
     """.format(**msg_dict)
     return msg
 
+ymdfmt = '%Y-%m-%d %H:%M:%S'
 p = Paths()
 pb = PBullet(p.key_dict['pushbullet_api'])
 logg = Log('commute.calculator', p.log_dir, 'commute', log_lvl="DEBUG")
@@ -110,14 +136,15 @@ sheet = ws.sheet1
 processed_sheet = ws.worksheet('Processed')
 
 # Check when the file was last updated
-last_update = processed_sheet.cell(1, 2).value
+# Force ISO date format -- sometimes Google sheets cell will leave out leading '0's
+last_update = pd.datetime.strptime(processed_sheet.cell(1, 2).value, ymdfmt).strftime(ymdfmt)
 
 commute_df = pd.DataFrame(sheet.get_all_records())
 
 # Begin processing columns
 # First, Date columns
 commute_df['timestamp'] = pd.to_datetime(commute_df['Raw_date'], format='%B %d, %Y at %I:%M%p')
-last_entry = max(commute_df['timestamp']).strftime('%Y-%m-%d %H:%M:%S')
+last_entry = max(commute_df['timestamp']).strftime(ymdfmt)
 
 if last_update < last_entry:
     logg.debug('New log found.')
@@ -170,9 +197,13 @@ if last_update < last_entry:
     logg.debug('Writing to csv.')
     daily_commute_df.to_csv(csv_save_path)
 
-    # Loop through daily_commute_df and add to processed sheet
-    #for i in range(daily_commute_df.shape[0]):
-    #    for j in range(daily_commute_df.shape[1]):
+    # Loop through daily_commute_df and add to processed sheet on Google Sheets
+    # Column title
+    # processed_sheet.insert_row(daily_commute_df.columns.tolist(), index=1)
+    # for i in range(daily_commute_df.shape[0]):
+    #     row = daily_commute_df.iloc[i]
+    #     row['date'] = row['date'].strftime('%Y-%m-%d')
+    #     processed_sheet.insert_row(row.tolist(), index=i + 2)
 
     # Notify of my recent commute time
     latest_entry = commute_df[commute_df['timestamp'] == max(commute_df['timestamp'])].iloc[0]
@@ -181,34 +212,22 @@ if last_update < last_entry:
 
     if latest_entry['activity'] == 'arrived' and latest_entry['Location'] == 'BAO_WORK':
         # Just arrived at work, analyze commute times
-        avg_commute = daily_commute_df[(daily_commute_df['work_commute'] > 0) & (-daily_commute_df['adjusted_work_commute'])][
-                'work_commute'].mean()
-        commute_time = today_df['work_commute'].iloc[0]
-        commute_diff = commute_time - avg_commute
         # Generate message
-        msg = message_generator('work_commute', current=commute_time, average=avg_commute, change=commute_diff)
+        msg = message_generator('work_commute', **get_metrics(daily_commute_df, today_df, 'work_commute', False))
     elif latest_entry['activity'] == 'left' and latest_entry['Location'] == 'BAO_WORK':
         # Just arrived at work, analyze commute times
-        avg_commute = daily_commute_df[(daily_commute_df['hours_at_work'] > 0)]['hours_at_work'].mean()
-        commute_time = today_df['hours_at_work'].iloc[0]
-        commute_diff = commute_time - avg_commute
         # Generate message
-        msg = message_generator('hours_at_work', current=commute_time, average=avg_commute, change=commute_diff)
+        msg = message_generator('hours_at_work', **get_metrics(daily_commute_df, today_df, 'hours_at_work', False))
     elif latest_entry['activity'] == 'arrived' and latest_entry['Location'] == 'HOME':
         # Just arrived at work, analyze commute times
-        avg_commute = daily_commute_df[(daily_commute_df['home_commute'] > 0) & (-daily_commute_df['adjusted_home_commute'])][
-                'home_commute'].mean()
-        commute_time = today_df['home_commute'].iloc[0]
-        commute_diff = commute_time - avg_commute
         # Generate message
-        msg = message_generator('home_commute', current=commute_time, average=avg_commute, change=commute_diff)
+        msg = message_generator('home_commute', **get_metrics(daily_commute_df, today_df, 'home_commute', False))
 
     if msg != '':
         logg.debug('Sending notification')
         pb.send_message('Commute Notification', msg)
 
-
     # Update cell with timestamp
-    processed_sheet.update_cell(1, 2, pd.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+    processed_sheet.update_cell(1, 2, pd.datetime.now().strftime(ymdfmt))
 
 logg.close()

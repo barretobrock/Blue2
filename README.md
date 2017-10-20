@@ -15,6 +15,9 @@ A directory of scripts for every function from home automation to web-scraping.
 ### pandas (installed on home server computer, for now)
     `sudo apt-get install python3-pandas`
 
+### Plotly
+    `sudo pip3 install plotly`
+
 ### Google Client Library and support modules (installed on home server computer for now)
     `sudo pip3 install --upgrade google-api-python-client`
     'sudo pip3 install gspread oauth2client'
