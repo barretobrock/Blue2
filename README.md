@@ -5,6 +5,12 @@ A directory of scripts for every function from home automation to web-scraping.
 ### Python Version
     As of now, most files are tested using primarily Python 3.4 (for Raspbian distro)
 
+### Static IP
+    Not really a requirement, but it definitely makes it easier if you set the pi's IP address to be static.
+    Steps include:
+        1.) Reserving the pi's static IP address with your router
+        2.) Set the pi's static address [here's a good place to start](https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address)
+
 ### File Permissions
     Probably useful to give execute permissions to script
     `chmod a+x foo.py`
@@ -64,6 +70,13 @@ A directory of scripts for every function from home automation to web-scraping.
     sudo pip install --upgrade pyserial
 
     ```
+
+## Troubleshooting
+
+### Crontab logs
+    `/var/log/syslog`
+
+
 
 ## Structure
 As some scripts will attempt to pull or save information to certain directories, a certain uniform structure is needed to make reusing scripts throughout different projects easy and fast. Collected data, logs and other information that should not be stored on the repo are kept in separate directories. The expected structure is shown below:

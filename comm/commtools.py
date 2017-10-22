@@ -60,13 +60,12 @@ class Inet:
         self.w.connect(ssid, passwd)
 
     def get_ip_address(self):
-        response = os.popen('ifconfig').read()
         try:
-            txt_split = response[response.index('192.168.0'):response.index('192.168.0') + 15]
-            txt_split = txt_split[:txt_split.index(' ')]
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            return s.getsockname()[0]
         except:
-            txt_split = response
-        return txt_split
+            return ''
 
     def ping_success(self, is_internal=False):
         """Check if connected to internet"""
@@ -164,8 +163,5 @@ class DomoticzComm:
     def switch_group_on(self, group_id):
         url = '{}&param=switchscene&idx={}&switchcmd=On'.format(self.prefix_url, group_id)
         subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
-
-
-
 
 
