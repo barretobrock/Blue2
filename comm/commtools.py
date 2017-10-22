@@ -50,7 +50,6 @@ class Inet:
     Performs variety of internet connection tests
     """
     def __init__(self):
-        self.ip_addr = self.get_ip_address()
         self.w = Wireless()
 
     def get_ssid(self):
