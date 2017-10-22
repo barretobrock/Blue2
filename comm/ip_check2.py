@@ -31,7 +31,7 @@ with open(p.ip_path) as f:
 
 if inet.ping_success():
     # If internet connection, check that ip address is the same
-    current_ip = inet.ip_addr
+    current_ip = inet.get_ip_address()
     if current_ip != '':
         logg.debug('Checked ip: {}'.format(current_ip))
         if last_ip != current_ip:
