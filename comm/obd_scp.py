@@ -16,31 +16,42 @@ else:
     sys.path.insert(0, os.path.join(cur_dir, *['Scripts', 'blue2']))
 # import custom modules
 from primary.maintools import Paths
-from comm.commtools import PBullet
 from logger.pylogger import Log
 import glob
+import paramiko
+
 
 p = Paths()
 logg = Log('obd.uploader', p.log_dir, 'obd_uploader', log_lvl="DEBUG")
-pb = PBullet(p.key_dict['pushbullet_api'])
+logg.debug('Log initiated')
+
+# Set location for RSA key
+privatekey_path = os.path.join(p.home_dir, *['.ssh', 'id_rsa'])
+mkey = paramiko.RSAKey.from_private_key_file(privatekey_path)
+
+ssh = paramiko.SSHClient()
+ssh.load_system_host_keys()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+# Connect to server using private key
+ssh.connect(p.server_ip, username=p.server_hostname, pkey=mkey)
+
+sftp = ssh.open_sftp()
+# Set directory to put csv files after transfer to server computer
 target_dir = os.path.abspath('/home/{}/data'.format(p.server_hostname))
 
-# find most recent csv file in data folder
-list_of_files = glob.glob("{}*.csv".format(p.data_dir))
-logg.debug('{} files total.'.format(len(list_of_files)))
+# Find all csv files in data folder relating to obd
+list_of_files = glob.glob("{}/obd_results*.csv".format(p.data_dir))
+logg.debug('{} files total. Beginning transfer.'.format(len(list_of_files)))
 if len(list_of_files) > 0:
     for csvfile in list_of_files:
-        # Upload files to server computer
-        cmd = "scp {} {}@{}:{}".format(os.path.join(p.data_dir, csvfile), p.server_hostname,
-                                       p.server_ip, os.path.join(target_dir, csvfile))
-        response = os.system(cmd)
-        if response == 0:
-            pb.send_mesage("File successfully sent.", "The data file was successfully sent.")
-            logg.debug('Successfully uploaded {}'.format(os.path.basename(csvfile)))
-            # File was successfully transmitted; remove file
-            rm_cmd = "rm {}".format(csvfile)
-            response1 = os.system(rm_cmd)
-        else:
-            pb.send_mesage("Error in uploading files.", "Error in uploading csv files.")
+        target_path = os.path.join(target_dir, os.path.basename(csvfile))
+        # Transfer file
+        sftp.put(csvfile, target_path)
+        logg.debug('Successfully uploaded {}'.format(os.path.basename(csvfile)))
+        try:
+            # Try to remove file after successful transfer
+            os.remove(csvfile)
+        except OSError:
+            pass
 
 logg.close()

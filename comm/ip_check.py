@@ -20,9 +20,9 @@ from primary.maintools import Paths
 from logger.pylogger import Log
 
 
-inet = Inet()
 p = Paths()
 logg = Log('autopi.ip', p.log_dir, 'autopi_ipaddr', log_lvl="DEBUG")
+inet = Inet()
 logg.debug('Log initiated')
 pb = PBullet(p.key_dict['pushbullet_api'])
 
@@ -31,13 +31,15 @@ with open(p.ip_path) as f:
 
 if inet.ping_success():
     # If internet connection, check that ip address is the same
-    current_ip = inet.ip_addr
-    logg.debug('Checked ip: {}'.format(current_ip))
-    if last_ip != current_ip:
-        # IP address for device has changed. Save new ip address and notify
-        logg.debug('IP address changed from {} to {}'.format(last_ip, current_ip))
-        pb.send_message(title="IP Address Changed", message="IP address has been changed to {}".format(current_ip))
-        with open(p.ip_path, 'w') as f:
-            f.write(current_ip)
+    current_ip = inet.get_ip_address()
+    if current_ip != '':
+        logg.debug('Checked ip: {}'.format(current_ip))
+        if last_ip != current_ip:
+            # IP address for device has changed. Save new ip address and notify
+            logg.debug('IP address changed from {} to {}'.format(last_ip, current_ip))
+            pb.send_message(title="IP Address Changed", message="IP address has been changed to {}".format(current_ip))
+            with open(p.ip_path, 'w') as f:
+                f.write(current_ip)
 
 logg.close()
+

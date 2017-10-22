@@ -36,11 +36,12 @@ def is_engine_on(conn):
         return True
     return False
 
-chelp = CSVHelper()
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
+chelp = CSVHelper()
 connection = obd.OBD()
+logg.debug('OBD connected')
 
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
@@ -65,6 +66,12 @@ cmd_list = [
     'AMBIANT_AIR_TEMP',
     'MAF',
     'THROTTLE_POS',
+    'THROTTLE_POS_B',
+    'THROTTLE_POS_C',
+    'RELATIVE_ACCEL_POS',
+    'ACCELERATOR_POS_D',
+    'ACCELERATOR_POS_E',
+    'ACCELERATOR_POS_F',
     'AIR_STATUS',
     'BAROMETRIC_PRESSURE',
     'EVAPORATIVE_PURGE',
@@ -81,12 +88,6 @@ cmd_list = [
     'ABSOLUTE_LOAD',
     'COMMANDED_EQUIV_RATIO',
     'RELATIVE_THROTTLE_POS',
-    'THROTTLE_POS_B',
-    'THROTTLE_POS_C',
-    'RELATIVE_ACCEL_POS',
-    'ACCELERATOR_POS_D',
-    'ACCELERATOR_POS_E',
-    'ACCELERATOR_POS_F',
     'THROTTLE_ACTUATOR',
     'RUN_TIME_MIL',
     'FUEL_TYPE',
@@ -100,11 +101,9 @@ if is_engine_on(connection):
     # If engine is on, being recording...
 
     while is_engine_on(connection) and t < end_time:
-        print('Beginning new line...')
         line_dict = OrderedDict(())
         line_dict['TIMESTAMP'] = dt.now().isoformat()
         for d in cmd_list:
-            print('Working on {}.'.format(d))
             try:
                 response = connection.query(obd.commands[d])
                 rval = response.value.magnitude
@@ -121,7 +120,6 @@ if is_engine_on(connection):
         # Append line of data to main dictionary
         result_dicts.append(line_dict)
         # Wait a second before continuing
-        logg.debug('Results written to dict... Waiting...')
         time.sleep(1)
         t = time.time()
 
