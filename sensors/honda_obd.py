@@ -40,9 +40,7 @@ p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
 chelp = CSVHelper()
-
-
-
+# Set path to write file to
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
 cmd_list = [
@@ -99,17 +97,18 @@ t = time.time()
 end_time = t + 60 * 5   # Run for five minutes
 
 connection = obd.OBD()
-while t < end_time:
+while time.time() < end_time:
     if not connection.is_connected():
         # Make sure bluetooth is connected. Otherwise try connecting to it
-        # Attempt to make connection. Sleep if
+        # Attempt to make connection.
         connection = obd.OBD()
         if not connection.is_connected():
-            time.sleep(30)
+            # Sleep if still no success
+            time.sleep(5)
     else:
         if is_engine_on(connection):
             # If engine is on, being recording...
-            while is_engine_on(connection) and t < end_time:
+            while is_engine_on(connection) and time.time() < end_time:
                 line_dict = OrderedDict(())
                 line_dict['TIMESTAMP'] = dt.now().isoformat()
                 for d in cmd_list:
@@ -130,7 +129,6 @@ while t < end_time:
                 result_dicts.append(line_dict)
                 # Wait a second before continuing
                 time.sleep(1)
-                t = time.time()
 
             logg.debug('Loop ended. Writing file.')
             # Save file
