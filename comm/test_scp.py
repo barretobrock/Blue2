@@ -36,12 +36,12 @@ if len(list_of_files) > 0:
                                        p.server_ip, os.path.join(target_dir, csvfile))
         response = os.system(cmd)
         if response == 0:
-            pb.send_mesage("File successfully sent.", "The data file was successfully sent.")
+            pb.send_message("File successfully sent.", "The data file was successfully sent.")
             logg.debug('Successfully uploaded {}'.format(os.path.basename(csvfile)))
             # File was successfully transmitted; remove file
             rm_cmd = "rm {}".format(csvfile)
             response1 = os.system(rm_cmd)
         else:
-            pb.send_mesage("Error in uploading files.", "Error in uploading csv files.")
+            pb.send_message("Error in uploading files.", "Error in uploading csv files.")
 
 logg.close()
