@@ -40,8 +40,8 @@ p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
 chelp = CSVHelper()
-connection = obd.OBD()
-logg.debug('OBD connected')
+
+
 
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
@@ -97,34 +97,45 @@ cmd_list = [
 result_dicts = []
 t = time.time()
 end_time = t + 60 * 5   # Run for five minutes
-if is_engine_on(connection):
-    # If engine is on, being recording...
 
-    while is_engine_on(connection) and t < end_time:
-        line_dict = OrderedDict(())
-        line_dict['TIMESTAMP'] = dt.now().isoformat()
-        for d in cmd_list:
-            try:
-                response = connection.query(obd.commands[d])
-                rval = response.value.magnitude
-            except:
-                rval = None
-                pass
+connection = obd.OBD()
+while t < end_time:
+    if not connection.is_connected():
+        # Make sure bluetooth is connected. Otherwise try connecting to it
+        # Attempt to make connection. Sleep if
+        connection = obd.OBD()
+        if not connection.is_connected():
+            time.sleep(30)
+    else:
+        if is_engine_on(connection):
+            # If engine is on, being recording...
+            while is_engine_on(connection) and t < end_time:
+                line_dict = OrderedDict(())
+                line_dict['TIMESTAMP'] = dt.now().isoformat()
+                for d in cmd_list:
+                    try:
+                        response = connection.query(obd.commands[d])
+                        rval = response.value.magnitude
+                    except:
+                        rval = None
+                        pass
 
-            if rval is None:
-                rval = 0
+                    if rval is None:
+                        rval = 0
 
-            # Append to dictionary
-            line_dict[d] = rval
+                    # Append to dictionary
+                    line_dict[d] = rval
 
-        # Append line of data to main dictionary
-        result_dicts.append(line_dict)
-        # Wait a second before continuing
-        time.sleep(1)
-        t = time.time()
+                # Append line of data to main dictionary
+                result_dicts.append(line_dict)
+                # Wait a second before continuing
+                time.sleep(1)
+                t = time.time()
 
-    logg.debug('Loop ended. Writing file.')
-    # Save file
-    chelp.ordered_dict_to_csv(result_dicts, save_path)
+            logg.debug('Loop ended. Writing file.')
+            # Save file
+            chelp.ordered_dict_to_csv(result_dicts, save_path)
+        else:
+            time.sleep(1)
 
 logg.close()
