@@ -11,9 +11,17 @@ A directory of scripts for every function from home automation to web-scraping.
         1.) Reserving the pi's static IP address with your router
         2.) Set the pi's static address [here's a good place to start](https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address)
 
+### [Passwordless SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
+    Set this up so the pi can connect to the server computer without having to use user password
+
+
 ### File Permissions
     Probably useful to give execute permissions to script
     `chmod a+x foo.py`
+
+### Paramiko (File transfer through SCP)
+    `sudo apt-get install python3-paramiko`
+    `sudo pip3 install scp`
 
 ### pushbullet
     `sudo pip3 install pushbullet.py`
