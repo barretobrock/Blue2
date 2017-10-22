@@ -20,9 +20,9 @@ from primary.maintools import Paths
 from logger.pylogger import Log
 
 
-inet = Inet()
 p = Paths()
 logg = Log('autopi.ip', p.log_dir, 'autopi_ipaddr', log_lvl="DEBUG")
+inet = Inet()
 logg.debug('Log initiated')
 pb = PBullet(p.key_dict['pushbullet_api'])
 

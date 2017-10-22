@@ -14,12 +14,9 @@ from email import encoders
 import mimetypes
 from smtplib import SMTP
 from pushbullet import PushBullet
-import time
-import datetime
 import socket
 import os
-import codecs
-from wireless import Wireless
+
 
 
 class PBullet:
@@ -50,13 +47,7 @@ class Inet:
     Performs variety of internet connection tests
     """
     def __init__(self):
-        self.w = Wireless()
-
-    def get_ssid(self):
-        return self.w.current()
-
-    def connect_ssid(self, ssid, passwd):
-        self.w.connect(ssid, passwd)
+        pass
 
     def get_ip_address(self):
         try:
