@@ -41,3 +41,4 @@ if inet.ping_success():
             f.write(current_ip)
 
 logg.close()
+

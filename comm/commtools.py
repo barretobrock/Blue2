@@ -61,8 +61,11 @@ class Inet:
 
     def get_ip_address(self):
         response = os.popen('ifconfig').read()
-        txt_split = response[response.index('192.168.0'):response.index('192.168.0') + 15]
-        txt_split = txt_split[:txt_split.index(' ')]
+        try:
+            txt_split = response[response.index('192.168.0'):response.index('192.168.0') + 15]
+            txt_split = txt_split[:txt_split.index(' ')]
+        except:
+            txt_split = response
         return txt_split
 
     def ping_success(self, is_internal=False):
