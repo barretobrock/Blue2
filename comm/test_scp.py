@@ -27,7 +27,7 @@ pb = PBullet(p.key_dict['pushbullet_api'])
 target_dir = os.path.abspath('/home/{}/data'.format(p.server_hostname))
 
 # find most recent csv file in data folder
-list_of_files = glob.glob("{}*.csv".format(p.data_dir))
+list_of_files = glob.glob("{}/*.csv".format(p.data_dir))
 logg.debug('{} files total.'.format(len(list_of_files)))
 if len(list_of_files) > 0:
     for csvfile in list_of_files:
