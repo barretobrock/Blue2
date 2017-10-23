@@ -22,7 +22,7 @@ class Paths:
 
         # ip addresses
         self.gatewaypi_ip = '192.168.0.5'
-        self.server_ip = '192.168.0.10'
+        self.server_ip = '192.168.0.3'
         self.server_hostname = 'barretobrock'
         # directories
         hostname = socket.gethostname()
