@@ -95,6 +95,7 @@ cmd_list = [
 result_dicts = []
 t = time.time()
 end_time = t + 60 * 5   # Run for five minutes
+end_time -= 5   # Take off five seconds for processing
 
 connection = obd.OBD()
 while time.time() < end_time:
@@ -104,7 +105,7 @@ while time.time() < end_time:
         connection = obd.OBD()
         if not connection.is_connected():
             # Sleep if still no success
-            time.sleep(5)
+            time.sleep(1)
     else:
         if is_engine_on(connection):
             # If engine is on, being recording...
