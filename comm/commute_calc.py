@@ -24,16 +24,16 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
 
-def grab_timestamp(activity, location, avg_time_str):
+def grab_timestamp(daily_df, activity, location, avg_time_str):
     avg_time = pd.to_datetime(avg_time_str, format="%H:%M")
     adjusted = False
     try:
         # Get the timestamp when I left home
-        tmstmp = df[(df['activity'] == activity) & (df['Location'] == location)].iloc[0].timestamp
+        tmstmp = daily_df[(daily_df['activity'] == activity) & (daily_df['Location'] == location)].iloc[0].timestamp
     except IndexError:
         # If time left home not recorded, give the average time
         #   TODO calculate the average time left for non-zero results
-        tmstmp = pd.to_datetime(row['date']).replace(hour=avg_time.hour, minute=avg_time.minute)
+        tmstmp = pd.to_datetime(daily_df.loc[0, 'date']).replace(hour=avg_time.hour, minute=avg_time.minute)
         adjusted = True
     return {'tstamp': tmstmp, 'adjusted': adjusted}
 
@@ -116,12 +116,15 @@ def message_generator(activity_type, **kwargs):
     """.format(**msg_dict)
     return msg
 
+
 ymdfmt = '%Y-%m-%d %H:%M:%S'
 p = Paths()
-pb = PBullet(p.key_dict['pushbullet_api'])
+
 logg = Log('commute.calculator', p.log_dir, 'commute', log_lvl="DEBUG")
 logg.debug('Log initiated')
+
 client_secret_path = p.google_client_secret
+pb = PBullet(p.key_dict['pushbullet_api'])
 
 csv_save_path = os.path.join(p.data_dir, 'commute_calculations.csv')
 
@@ -176,22 +179,20 @@ if last_update < last_entry:
     )
 
     for i in range(daily_commute_df.shape[0]):
-        row = daily_commute_df.iloc[i]
-        if int(row['dow']) < 6:
+        #row = daily_commute_df.iloc[i]
+        if int(daily_commute_df.loc[i, 'dow']) < 6:
             # work day
-            df = commute_df[commute_df['date'] == row['date']]
-            time_left_home = grab_timestamp('left', 'HOME', '07:35')
-            time_arrived_work = grab_timestamp('arrived', 'BAO_WORK', '08:25')
-            time_left_work = grab_timestamp('left', 'BAO_WORK', '16:45')
-            time_arrived_home = grab_timestamp('arrived', 'HOME', '17:30')
+            df = commute_df[commute_df['date'] == daily_commute_df.loc[i, 'date']]
+            time_left_home = grab_timestamp(df, 'left', 'HOME', '07:35')
+            time_arrived_work = grab_timestamp(df, 'arrived', 'BAO_WORK', '08:25')
+            time_left_work = grab_timestamp(df, 'left', 'BAO_WORK', '16:45')
+            time_arrived_home = grab_timestamp(df, 'arrived', 'HOME', '17:30')
             # Calculate minutes for work commute
-            row['work_commute'] = pd.Timedelta(time_arrived_work['tstamp'] - time_left_home['tstamp']).seconds / 60
-            row['adjusted_work_commute'] = any([time_left_home['adjusted'], time_arrived_work['adjusted']])
-            row['hours_at_work'] = pd.Timedelta(time_left_work['tstamp'] - time_arrived_work['tstamp']).seconds / 60 / 60
-            row['home_commute'] = pd.Timedelta(time_arrived_home['tstamp'] - time_left_work['tstamp']).seconds / 60
-            row['adjusted_home_commute'] = any([time_left_work['adjusted'], time_arrived_home['adjusted']])
-            # Merge row back in with data frame
-            daily_commute_df.iloc[i] = row
+            daily_commute_df.loc[i, 'work_commute'] = pd.Timedelta(time_arrived_work['tstamp'] - time_left_home['tstamp']).seconds / 60
+            daily_commute_df.loc[i, 'adjusted_work_commute'] = any([time_left_home['adjusted'], time_arrived_work['adjusted']])
+            daily_commute_df.loc[i, 'hours_at_work'] = pd.Timedelta(time_left_work['tstamp'] - time_arrived_work['tstamp']).seconds / 60 / 60
+            daily_commute_df.loc[i, 'home_commute'] = pd.Timedelta(time_arrived_home['tstamp'] - time_left_work['tstamp']).seconds / 60
+            daily_commute_df.loc[i, 'adjusted_home_commute'] = any([time_left_work['adjusted'], time_arrived_home['adjusted']])
 
     # Save csv file
     logg.debug('Writing to csv.')

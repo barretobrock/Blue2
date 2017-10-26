@@ -9,7 +9,20 @@ A directory of scripts for functions from home automation to web-scraping.
     Not really a requirement, but it definitely makes it easier if you set the pi's IP address to be static.
     Steps include:
         1.) Reserving the pi's static IP address with your router
-        2.) Set the pi's static address [here's a good place to start](https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address)
+        2.) Set the pi's static address here's a [good place to start](https://www.modmypi.com/blog/tutorial-how-to-give-your-raspberry-pi-a-static-ip-address)
+
+    Example:
+    ```bash
+    allow-hotplug wlan0
+    iface wlan0 inet static
+        wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+        address 192.168.0.X
+        netmask 255.255.255.0
+        network 192.168.0.0
+        broadcast 192.168.0.255
+        gateway 192.168.0.1
+    ```
+
 
 ### [Passwordless SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
     Set this up so the pi can connect to the server computer without having to use user password
@@ -44,7 +57,7 @@ A directory of scripts for functions from home automation to web-scraping.
     sudo pip3 install wireless
     ```
 ### OBD2
-    ```
+    ```bash
     # Make sure python-dev or python3-dev are installed
     sudo apt-get install python3-dev
     sudo apt-get install libbluetooth-dev
@@ -79,6 +92,10 @@ A directory of scripts for functions from home automation to web-scraping.
     ```
 
 ## Troubleshooting
+
+### Git highlighter
+    Always useful for determining which branch you're on!
+    Found in setup/git_highlighter.sh
 
 ### Crontab logs
     `/var/log/syslog`

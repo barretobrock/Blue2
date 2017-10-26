@@ -12,7 +12,7 @@ import socket
 import csv
 import datetime
 from collections import OrderedDict
-import base64
+import glob
 
 
 class Paths:
@@ -36,6 +36,7 @@ class Paths:
         self.log_dir = os.path.join(self.home_dir, 'logs')
         self.key_dir = os.path.join(self.home_dir, 'keys')
         # filepaths
+        self.privatekey_path = os.path.join(os.path.expanduser('~'), *['.ssh', 'id_rsa'])
         self.google_client_secret = os.path.join(self.key_dir, 'client_secret.json')
         self.ip_path = os.path.join(self.key_dir, 'myip.txt')
 
@@ -66,13 +67,34 @@ class DateTools:
         return datetime.datetime.strptime(datestring, strftime_string)
 
     def string_to_unix(self, date_string, strftime_string='%Y%m%d'):
-        unix = (
-        datetime.datetime.strptime(date_string, strftime_string) - datetime.datetime(1970, 1, 1)).total_seconds()
+        unix = (datetime.datetime.strptime(date_string, strftime_string) - datetime.datetime(1970, 1, 1)).total_seconds()
         return unix * 1000
 
     def unix_to_string(self, unix_date, output_fmt='%Y-%m-%d'):
         date_string = datetime.datetime.fromtimestamp(unix_date).strftime(output_fmt)
         return date_string
+
+
+class FileSCP:
+
+    def __init__(self, privatekey_path, server_ip, server_hostname):
+        # Import paramiko
+        self.pmiko = __import__('paramiko')
+
+        mkey = self.pmiko.RSAKey.from_private_key_file(privatekey_path)
+
+        self.ssh = self.pmiko.SSHClient()
+        self.ssh.load_host_keys()
+        self.ssh.set_missing_host_key_policy(self.pmiko.AutoAddPolicy())
+        # Connect to server using private key
+        self.ssh.connect(server_ip, username=server_hostname, pkey=mkey)
+        self.sftp = self.ssh.open_sftp()
+
+    def scp_transfer(self, source_path, dest_path, is_remove_file=False):
+        self.sftp.put(source_path, dest_path)
+        if is_remove_file:
+            # Try to remove file after successful transfer
+            os.remove(source_path)
 
 
 class CSVHelper:
@@ -89,6 +111,36 @@ class CSVHelper:
             for row in reader:
                 list_out.append(OrderedDict(zip(keys, row)))
         return list_out
+
+    def csv_compacter(self, compacted_data_path, path_with_glob, sort_column='', remove_files=True):
+        if os.path.exists(compacted_data_path):
+            master_df = self.csv_to_ordered_dict(compacted_data_path)
+        else:
+            master_df = []
+
+        list_of_files = glob.glob(path_with_glob)
+        new_df_list = []
+        if len(list_of_files) > 0:
+            # Iterate through each file, combine
+            for csvfile in list_of_files:
+                df = self.csv_to_ordered_dict(csvfile)
+                new_df_list += df
+            master_df += new_df_list
+
+            # Sort dataframe
+            if sort_column != '':
+                if sort_column.lower() in [x.lower() for x in master_df[0].keys()]:
+                    # Determine the column to be sorted
+                    for c in master_df[0].keys():
+                        if c.lower() == sort_column.lower():
+                            col = c
+                            break
+                    master_df = sorted(master_df, key=lambda k: k[col])
+            # Save appended dataframe
+            self.ordered_dict_to_csv(master_df, compacted_data_path)
+            if remove_files:
+                for csvfile in list_of_files:
+                    os.remove(csvfile)
 
     def ordered_dict_to_csv(self, data_dict, path_to_csv, writetype='w'):
         # saves list of list of ordered dicts to path
