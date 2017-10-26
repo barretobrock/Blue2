@@ -18,7 +18,6 @@ import socket
 import os
 
 
-
 class PBullet:
     def __init__(self, api):
         self.api = api
@@ -68,6 +67,7 @@ class Inet:
             return True
         else:
             return False
+
 
 class Email:
     """
