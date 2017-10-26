@@ -36,6 +36,7 @@ def is_engine_on(conn):
         return True
     return False
 
+mesurement_interval = 0.5 # time to wait between measurements
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
@@ -105,7 +106,7 @@ while time.time() < end_time:
         connection = obd.OBD()
         if not connection.is_connected():
             # Sleep if still no success
-            time.sleep(1)
+            time.sleep(mesurement_interval)
     else:
         if is_engine_on(connection):
             # If engine is on, being recording...
@@ -129,12 +130,12 @@ while time.time() < end_time:
                 # Append line of data to main dictionary
                 result_dicts.append(line_dict)
                 # Wait a second before continuing
-                time.sleep(1)
+                time.sleep(mesurement_interval)
 
             logg.debug('Loop ended. Writing file.')
             # Save file
             chelp.ordered_dict_to_csv(result_dicts, save_path)
         else:
-            time.sleep(1)
+            time.sleep(mesurement_interval)
 
 logg.close()

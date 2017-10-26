@@ -26,7 +26,6 @@ logg.debug('Log initiated')
 
 fscp = FileSCP(p.privatekey_path, p.server_ip, p.server_hostname)
 
-
 # Set directory to put csv files after transfer to server computer
 target_dir = os.path.abspath('/home/{}/data'.format(p.server_hostname))
 
