@@ -27,13 +27,13 @@ import pandas as pd
 def grab_timestamp(daily_df, activity, location, avg_time_str):
     avg_time = pd.to_datetime(avg_time_str, format="%H:%M")
     adjusted = False
-    try:
-        # Get the timestamp when I left home
-        tmstmp = daily_df[(daily_df['activity'] == activity) & (daily_df['Location'] == location)].iloc[0].timestamp
-    except IndexError:
-        # If time left home not recorded, give the average time
-        #   TODO calculate the average time left for non-zero results
-        tmstmp = pd.to_datetime(daily_df.loc[0, 'date']).replace(hour=avg_time.hour, minute=avg_time.minute)
+
+    # Filter dataframe basec on activity and location
+    filtered_df = daily_df[(daily_df['activity'] == activity) & (daily_df['Location'] == location)]
+    if not filtered_df.empty:
+        tmstmp = filtered_df.iloc[0]['timestamp']
+    else:
+        tmstmp = pd.to_datetime(daily_df.iloc[0]['date']).replace(hour=avg_time.hour, minute=avg_time.minute)
         adjusted = True
     return {'tstamp': tmstmp, 'adjusted': adjusted}
 
