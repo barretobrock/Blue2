@@ -61,9 +61,15 @@ def grab_timestamp(daily_df, activity, location, avg_time_str):
     return {'tstamp': tmstmp, 'adjusted': adjusted}
 
 
-
-
 def get_metrics(df, todaydf, col_name, incl_adjusted):
+    """
+    Retireves min, mean and max of given column name in a pandas.DataFrame object
+    Args:
+        df: pandas.DataFrame object
+        todaydf: pandas.DataFrame with similar structure as df, but filtered by today
+        col_name: str, name of column to get desired metrics from
+        incl_adjusted: boolean, include adjusted measurements in calculations
+    """
     filtered_df = df[(df[col_name] > 0)]
     if not incl_adjusted:
         adj_col_name = 'adjusted_' + col_name
@@ -83,6 +89,13 @@ def get_metrics(df, todaydf, col_name, incl_adjusted):
 
 
 def message_generator(activity_type, **kwargs):
+    """
+    Generates a message for commute statistic notifications
+    Args:
+        activity_type: str, ^((work|home)_commute|hours_at_work)$
+    kwargs:
+        ** dictionary from get_metrics()
+    """
     if 'work_commute' == activity_type:
         msg_dict = {
             'wow': 'Woah!',
@@ -199,7 +212,6 @@ if last_update < last_entry:
     )
 
     for i in range(daily_commute_df.shape[0]):
-        #row = daily_commute_df.iloc[i]
         if int(daily_commute_df.loc[i, 'dow']) < 6:
             # work day
             df = commute_df[commute_df['date'] == daily_commute_df.loc[i, 'date']]

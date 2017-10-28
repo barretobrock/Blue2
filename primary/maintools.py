@@ -44,7 +44,7 @@ class Paths:
         file_list = [
             'darksky_api.txt',
             'pushbullet_api.txt',
-
+            'plotly_api.txt'
         ]
 
         self.key_dict = {}
