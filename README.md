@@ -1,11 +1,33 @@
 # Blue2
-A directory of scripts for functions from home automation to web-scraping.
+A collection of scripts that make it easier for me to do stuff.
+Projects include, but are not limited to:
+- Work <-> home commute calculator
+- Car engine data recorder
 
-## Requirements
-### Python Version
-As of now, most files are tested using primarily Python 3.4+ (for Raspbian distro & Xubuntu)
+## Table of Contents
+1. [Requirements](#requirements)
+    1. [Python Version](#python_version)
+    1. [Static IP](#static_ip)
+    1. [Passwordless SSH](#passwordless_ssh)
+    1. [File Permissions](#file_permissions)
+    1. [Python Packages](#python_packages)
+        1. [Paramiko](#paramiko)
+        1. [Pushbullet](#pushbullet)
+        1. [Pandas](#pandas)
+        1. [Plotly](#plotly)
+        1. [Google Client Library](#google_client_library)
+        1. [OBD2 for Python](#obd2)
+1. [Tools](#tools)
+    1. [Git Highlighter](#git_highlighter)
+1. [Troubleshooting](#troubleshooting)
+    1. [Accessing Crontab logs](#crontab_logs)
+1. [Repo Structure](#structure)
 
-### Static IP
+## Requirements <a id="requirements"></a>
+### Python Version <a id="python_version"></a>
+As of now, most files are tested using primarily Python 3.4+ (tested on Raspbian & Xubuntu distros)
+
+### Static IP <a id="static_ip"></a>
 Not really a requirement, but it definitely makes it easier if you set the pi's IP address to be static.
 Steps include:
     1.) Reserving the pi's static IP address with your router
@@ -24,43 +46,44 @@ iface wlan0 inet static
 ```
 
 
-### [Passwordless SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
+### [Passwordless SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) <a id="passwordless_ssh"></a>
 Set this up so the pi can connect to the server computer without having to use user password
 
-### File Permissions
+### File Permissions <a id="file_permissions"></a>
 Probably useful to give execute permissions to script
 ```bash
 chmod a+x foo.py
 ```
 
-### Paramiko (File transfer through SCP)
+### Python Packages <a id="python_packages"></a>
+#### Paramiko (File transfer through SCP) <a id="paramiko"></a>
 ```bash
 sudo apt-get install python3-paramiko
 ```
 
-### Pushbullet
+#### Pushbullet <a id="pushbullet"></a>
 ```bash
 sudo pip3 install pushbullet.py
 ```
 
-### Pandas
+#### Pandas <a id="pandas"></a>
 ```bash
 sudo apt-get install python3-pandas
 ```
 
-### Plotly
+#### Plotly <a id="plotly"></a>
 ```bash
 sudo pip3 install plotly
 ```
 
-### Google Client Library and support modules (installed on home server computer for now)
+#### Google Client Library and support modules (installed on home server computer for now) <a id="google_client_library"></a>
 Follow instructions from [this link](https://www.twilio.com/blog/2017/02/an-easy-way-to-read-and-write-to-a-google-spreadsheet-in-python.html)
 ```bash
 sudo pip3 install --upgrade google-api-python-client
 sudo pip3 install gspread oauth2client
 ```
 
-### OBD2
+#### OBD2 <a id="obd2"></a>
 ```bash
 # Make sure python-dev or python3-dev are installed
 sudo apt-get install python3-dev
@@ -99,18 +122,19 @@ quit()
 sudo pip install --upgrade pyserial
 ```
 
-## Troubleshooting
+## Tools <a id="tools"></a>
+### Git highlighter <a id="git_highlighter"></a>
+Always useful for determining which git branch you're on!
+Found in [setup/git_highlighter.sh](setup/git_highlighter.sh)
 
-### Git highlighter
-Always useful for determining which branch you're on!
-Found in setup/git_highlighter.sh
+## Troubleshooting <a id="troubleshooting"></a>
 
-### Crontab logs
+### Access crontab logs <a id="crontab_logs"></a>
 ```bash
 /var/log/syslog
 ```
 
-## Structure
+## Structure <a id="structure"></a>
 As some scripts will attempt to pull or save information to certain directories, a certain uniform structure is needed to make reusing scripts throughout different projects easy and fast. Collected data, logs and other information that should not be stored on the repo are kept in separate directories. The expected structure is shown below:
 ```
 ~/

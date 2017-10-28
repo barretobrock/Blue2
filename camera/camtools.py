@@ -4,6 +4,7 @@ from picamera import PiCamera
 
 class Camera:
     def __init__(self):
+
         pass
 
     def capture_image(self, save_dir, res=(1280, 720), framerate=24, extra_text='', timestamp=True, vflip=False, hflip=False):

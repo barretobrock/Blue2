@@ -25,22 +25,42 @@ import pandas as pd
 
 
 def grab_timestamp(daily_df, activity, location, avg_time_str):
+    """
+    Searches through dataframe for certain activity at certain location.
+    If no timestamp found for given combination, the average time string is processed
+    Args:
+        daily_df: pandas.DataFrame of day's activities at given locations
+        activity: str, 'left' or 'arrived'
+        location: str, location of activity
+        avg_time_str: str, HH:MM of when activity at location takes place on average
+    Returns:
+        dictionary including timestamp and boolean whether the average time
+            was used instead of the actual time.
+    """
     avg_time = pd.to_datetime(avg_time_str, format="%H:%M")
     adjusted = False
 
     # Filter dataframe basec on activity and location
     filtered_df = daily_df[(daily_df['activity'] == activity) & (daily_df['Location'] == location)]
+
     if not filtered_df.empty:
-        tmstmp = filtered_df.iloc[0]['timestamp']
+        # If multiple results in filtered dataframe, apply logic to choose correctly:
+        #   activity = 'left': pick first entry
+        #   activity = 'arrived': pick last entry
+        if filtered_df.shape[0] > 1:
+            if activity == 'left':
+                xrow = 0
+            elif activity == 'arrived':
+                xrow = filtered_df.shape[0] - 1
+        else:
+            xrow = 0
+        tmstmp = filtered_df.iloc[xrow]['timestamp']
     else:
         tmstmp = pd.to_datetime(daily_df.iloc[0]['date']).replace(hour=avg_time.hour, minute=avg_time.minute)
         adjusted = True
     return {'tstamp': tmstmp, 'adjusted': adjusted}
 
 
-def seconds_since_midnight(timestamp):
-    seconds = (timestamp - timestamp.replace(hour=0, minute=0, second=0)).total_seconds()
-    return seconds
 
 
 def get_metrics(df, todaydf, col_name, incl_adjusted):
