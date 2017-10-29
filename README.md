@@ -16,7 +16,8 @@ Projects include, but are not limited to:
         1. [Pandas](#pandas)
         1. [Plotly](#plotly)
         1. [Google Client Library](#google_client_library)
-        1. [OBD2 for Python](#obd2)
+        1. [OBD2 for Python](#python-obd)
+    1. [OBD over Bluetooth](#obd_setup)
 1. [Tools](#tools)
     1. [Git Highlighter](#git_highlighter)
 1. [Troubleshooting](#troubleshooting)
@@ -84,11 +85,16 @@ sudo pip3 install --upgrade google-api-python-client
 sudo pip3 install gspread oauth2client
 ```
 
-#### OBD2 <a id="obd2"></a>
+#### python-obd <a id="obd2"></a>
+```bash
+sudo pip3 install obd
+```
+
+### OBD Over Bluetooth Setup <a id="obd_setup"></a>
 ```bash
 # Make sure python-dev or python3-dev are installed
-sudo apt-get install python3-dev
-sudo apt-get install libbluetooth-dev
+sudo apt-get install python3-dev libbluetooth-dev
+sudo pip3 install obd
 
 # Check connection to bluetooth device
 # In shell:

@@ -21,15 +21,20 @@ else:
 
 
 class TempSensor:
+    """
+    Sets up a sensor for temperature readings
+    Args for __init__:
+        model: str, model of temperature sensor ('DHT', 'Dallas')
+    """
     def __init__(self, model='Dallas'):
         self.model = model
 
     def measurement(self, pin):
         readings = {}
         if self.model == 'DHT':
-            import Adafruit_DHT
-            sensor = Adafruit_DHT.DHT22
-            humidity, temp = Adafruit_DHT.read_retry(sensor, pin)
+            self.AdaDHT = __import__('Adafruit_DHT')
+            sensor = self.AdaDHT.DHT22
+            humidity, temp = self.AdaDHT.read_retry(sensor, pin)
             readings = {
                 'humidity': humidity,
                 'temp': temp,

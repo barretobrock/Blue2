@@ -23,6 +23,7 @@ from logger.pylogger import Log
 
 
 def is_engine_on(conn):
+    """Determines if engine is running"""
     try:
         response = conn.query(obd.commands.RPM)
         rval = response.value.magnitude
@@ -36,6 +37,7 @@ def is_engine_on(conn):
         return True
     return False
 
+
 mesurement_interval = 1 # time to wait between measurements
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
@@ -44,54 +46,8 @@ chelp = CSVHelper()
 # Set path to write file to
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
-cmd_list = [
-    'RUN_TIME',
-    'RPM',
-    'SPEED',
-    'FUEL_LEVEL',
-    'FUEL_RATE',
-    'OIL_TEMP',
-    'ENGINE_LOAD',
-    'SHORT_FUEL_TRIM_1',
-    'LONG_FUEL_TRIM_1',
-    'DISTANCE_W_MIL',
-    'FUEL_RAIL_PRESSURE_VAC',
-    'FUEL_RAIL_PRESSURE_DIRECT',
-    'FUEL_RAIL_PRESSURE_ABS',
-    'INTAKE_PRESSURE',
-    'TIMING_ADVANCE',
-    'FUEL_INJECT_TIMING',
-    'INTAKE_TEMP',
-    'AMBIANT_AIR_TEMP',
-    'MAF',
-    'THROTTLE_POS',
-    'THROTTLE_POS_B',
-    'THROTTLE_POS_C',
-    'RELATIVE_ACCEL_POS',
-    'ACCELERATOR_POS_D',
-    'ACCELERATOR_POS_E',
-    'ACCELERATOR_POS_F',
-    'AIR_STATUS',
-    'BAROMETRIC_PRESSURE',
-    'EVAPORATIVE_PURGE',
-    'EVAP_VAPOR_PRESSURE',
-    'O2_B1S1',
-    'O2_B1S2',
-    'O2_B1S3',
-    'O2_B1S4',
-    'O2_B2S1',
-    'O2_B2S2',
-    'O2_B2S3',
-    'O2_B2S4',
-    'CONTROL_MODULE_VOLTAGE',
-    'ABSOLUTE_LOAD',
-    'COMMANDED_EQUIV_RATIO',
-    'RELATIVE_THROTTLE_POS',
-    'THROTTLE_ACTUATOR',
-    'RUN_TIME_MIL',
-    'FUEL_TYPE',
-    'ETHANOL_PERCENT',
-]
+# Get commands  
+cmd_list = [x.name for x in obd.commands[1][4:]]
 
 result_dicts = []
 t = time.time()
