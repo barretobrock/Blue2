@@ -13,7 +13,10 @@ from selenium.webdriver.chrome.options import Options
 
 class ChromeDriver(Chrome):
     """
-    Initiates the Chrome driver for Selenium
+    Initiates Chromedriver for Selenium
+    Args for __init__:
+        driver_path: path to Chromedriver
+        timeout: int, seconds to wait until connection unsuccessful
     """
     def __init__(self, driver_path, timeout=60):
         self.driver_path = driver_path
@@ -37,6 +40,9 @@ class ChromeDriver(Chrome):
 class PhantomDriver(PhantomJS):
     """
     Initiates the PhantomJS driver for Selenium
+    Args for __init__:
+        driver_path: path to Chromedriver
+        timeout: int, seconds to wait until connection unsuccessful
     """
     def __init__(self, driver_path, timeout=60):
         self.driver_path = driver_path
@@ -53,15 +59,8 @@ class PhantomDriver(PhantomJS):
 class Action:
     """
     Performs action to Selenium-class webdriver
-
-    Functions:
-        click: Clicks HTML element
-        clear: Clears form element
-        enter: Enters text to form element
-        get: Returns selenium-class element(s)
-        get_text: Returns text/list of text
-        remove: Removes HTML element
-        announce_exception: Internal function. Prints when exception occurred
+    Args for __init__:
+        driver: Selenium-type driver class
     """
     def __init__(self, driver):
         self.driver = driver
@@ -70,7 +69,7 @@ class Action:
         """
         Navigates browser to url
         Args:
-            url: url to navigate to
+            url: str, url to navigate to
         """
         self.driver.get(url)
 
@@ -78,7 +77,7 @@ class Action:
         """
         Clicks HTML element
         Args:
-            xpath: xpath to element to click
+            xpath: str, xpath to element to click
         """
         d = self.driver.find_element_by_xpath
         for i in range(0, 3):
@@ -92,7 +91,7 @@ class Action:
         """
         Clears form element of text
         Args:
-            xpath: xpath to form element
+            xpath: str, xpath to form element
         """
         d = self.driver.find_element_by_xpath
         for i in range(0, 3):
@@ -106,8 +105,8 @@ class Action:
         """
         Enters text into form element
         Args:
-            xpath: xpath to form
-            entry_text: text to enter into form
+            xpath: str, xpath to form
+            entry_text: str, text to enter into form
         """
         d = self.driver.find_element_by_xpath
         for i in range(0, 3):
@@ -121,8 +120,7 @@ class Action:
         """
         Determines if particular element exists
         Args:
-            xpath: xpath to HTML element
-
+            xpath: str, xpath to HTML element
         Returns: True if exists
         """
         try:
@@ -135,9 +133,8 @@ class Action:
         """
         Returns HTML elements as selenium objects
         Args:
-            xpath: xpath of element to return
-            single: True if returning only one element
-
+            xpath: str, xpath of element to return
+            single: boolean, True if returning only one element. default: True
         Returns: HTML element(s) matching xpath text
         """
         if single:
@@ -155,9 +152,8 @@ class Action:
         """
         Returns text in element(s)
         Args:
-            xpath: xpath to element
-            single: Whether to extract from single element or multiple
-
+            xpath: str, xpath to element
+            single: boolean, Whether to extract from single element or multiple. default = True
         Returns: Text from inside element(s)
         """
         if single:
@@ -185,8 +181,8 @@ class Action:
         """
         Uses JavaScript commands to remove desired element
         Args:
-            xpath: xpath to element
-            single: whether to apply to single element or multiple
+            xpath: str, xpath to element
+            single: boolean whether to apply to single element or multiple. default = True
         """
         script = """
         var element = arguments[0];
@@ -215,13 +211,11 @@ class Action:
     def rand_wait(self, speed_txt):
         """
         Determines sleep time as random number between upper and lower limit,
-            then sleeps for that given time.
-        After sleep, moves randomly vertically and horizontally on page
+            then sleeps for that given time. After sleep, moves randomly vertically and horizontally on page
             for up to four times
         Args:
-            speed_txt: text indicating level of wait (slow, medium, fast)
+            speed_txt: str, indicates level of wait (slow, medium, fast)
         """
-
         speed_dict = {
             'slow': 1,
             'medium': 10,
@@ -252,7 +246,7 @@ class Action:
         """
         Prints when exception encountered
         Args:
-            num_attempt: Number of previous attempts in current task
+            num_attempt: int, number of previous attempts in current task
         """
         print("Exceptions encountered: {}".format(num_attempt))
         time.sleep(2)

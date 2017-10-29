@@ -21,6 +21,7 @@ Projects include, but are not limited to:
     1. [Git Highlighter](#git_highlighter)
 1. [Troubleshooting](#troubleshooting)
     1. [Accessing Crontab logs](#crontab_logs)
+1. [Crontab Tasks](#crontab_tasks)
 1. [Repo Structure](#structure)
 
 ## Requirements <a id="requirements"></a>
@@ -132,6 +133,19 @@ Found in [setup/git_highlighter.sh](setup/git_highlighter.sh)
 ### Access crontab logs <a id="crontab_logs"></a>
 ```bash
 /var/log/syslog
+```
+## Crontab Tasks <a id="crontab_tasks"></a>
+
+#### Home Server
+```
+*/5 * * * * /usr/bin/python3 ~/blue2/weather/severe_weather_check.py
+*/10 07-20 * * 1-5 /usr/bin/python3 ~/blue2/comm/commute_calc.py
+10 0 * * * /usr/bin/python3 ~/blue2/agg/obd_compacter.py
+```
+#### autoPi
+```
+*/5 * * * * /usr/bin/python3 ~/blue2/sensors/honda_obd.py
+0 0 * * * /usr/bin/python3 ~/blue2/comm/obd_scp.py
 ```
 
 ## Structure <a id="structure"></a>

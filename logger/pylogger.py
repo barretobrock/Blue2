@@ -11,16 +11,15 @@ from datetime import datetime as dt
 
 
 class Log:
+    """
+    Initiates an object to log processes from error-level to debug-level
+    Args from __init__:
+        log_name: str, display name of the log
+        log_dir: str, directory to save the log
+        log_filename_prefix: str, filename prefix (ex. 'npslog')
+        log_lvl: str, minimum logging level to write to log (Hierarchy: DEBUG -> INFO -> WARN -> ERROR)
+    """
     def __init__(self, log_name, log_dir, log_filename_prefix, log_lvl='DEBUG'):
-        """
-        Initiates the logger(s)
-
-        Args:
-            log_name: Display name of the log
-            log_dir: Directory to save the log
-            log_filename_prefix: Filename prefix (ex. 'npslog')
-            log_lvl: Minimum logging level to write to log (Hierarchy: DEBUG -> INFO -> WARN -> ERROR)
-        """
         # Name of log in logfile
         self.log_name = log_name
         # Set name of file
@@ -59,24 +58,30 @@ class Log:
         sys.excepthook = self.handle_exception
 
     def handle_exception(self, exc_type, exc_value, exc_traceback):
+        """Intercepts an exception and prints it to log file"""
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
         self.logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
     def info(self, text):
+        """Info-level logging"""
         self.logger.info(text)
 
     def debug(self, text):
+        """Debug-level logging"""
         self.logger.debug(text)
 
     def warning(self, text):
+        """Warn-level logging"""
         self.logger.warning(text)
 
     def error(self, text):
+        """Error-level logging"""
         self.logger.error(text)
 
     def close(self):
+        """Close logger"""
         self.logger.debug('Log disconnected.\n' + '-' * 80)
         handlers = self.logger.handlers
         for handler in handlers:

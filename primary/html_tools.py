@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Tools used for makeing HTML files and the formatting and graphing within
+Tools used for making HTML files and the formatting and graphing within
 """
 
 
@@ -17,8 +17,7 @@ class FormatTools:
             output_type: What the number output should be
                 'number' = no changes
                 'percent' = decimal number should be converted to percent
-            decimals:
-
+            decimals: int, number of decimals to return
         Returns:
 
         """
@@ -46,12 +45,9 @@ class FormatTools:
                 'number': normal number
                 'percent': number is converted to percent (n * 100)
                 'difference': forces sign (+/-) in front of number
-
             suffix: any text to preceded the converted string
             decimals: decimal places to round
-
         Returns: Formatted text
-
         """
         if isinstance(num, str):
             num = float(num.replace(',', '.'))
@@ -80,6 +76,7 @@ class FormatTools:
         return result
 
     def text_to_number(self, num_str, digits=0):
+        """Converts text to number"""
         # handle if string is None or has characters in it
         if num_str.isalpha() or num_str is None:
             num = 0

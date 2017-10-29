@@ -36,7 +36,7 @@ def is_engine_on(conn):
         return True
     return False
 
-mesurement_interval = 0.5 # time to wait between measurements
+mesurement_interval = 1 # time to wait between measurements
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
