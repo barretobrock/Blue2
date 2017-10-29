@@ -51,6 +51,21 @@ iface wlan0 inet static
 ### [Passwordless SSH](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) <a id="passwordless_ssh"></a>
 Set this up so the pi can connect to the server computer without having to use user password
 
+- Check that the RasPi has a `.ssh` folder. If not, make one:
+```bash
+cd ~
+install -d -m 700 ~/.ssh
+```
+- Generate a new key for connecting to the specific computer
+```bash
+ssh-keygen -t rsa -C <USERNAME>@<HOSTNAME>
+
+# Press <Enter> 3x
+
+# Copy public key to target computer
+cat ~/.ssh/id_rsa.pub | ssh <USERNAME>@<IP_ADDRESS> 'cat >> .ssh/authorized_keys'
+```
+
 ### File Permissions <a id="file_permissions"></a>
 Probably useful to give execute permissions to script
 ```bash

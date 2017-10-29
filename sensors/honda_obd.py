@@ -46,7 +46,7 @@ chelp = CSVHelper()
 # Set path to write file to
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
 
-# Get commands  
+# Get commands
 cmd_list = [x.name for x in obd.commands[1][4:]]
 
 result_dicts = []
