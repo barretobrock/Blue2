@@ -25,16 +25,16 @@ from comm.commtools import PBullet
 
 
 p = Paths()
-ds_api = p.dark_sky_api
-pb_api = p.pushbullet_api
+# initiate logging
+logg = Log('severe_weather', p.log_dir, 'sevweather', 'INFO')
+logg.debug('Logger initiated.')
+
+ds_api = p.key_dict['darksky_api']
+pb_api = p.key_dict['pushbullet_api']
 
 dtools = DateTools()
 csvhelp = CSVHelper()
 pb = PBullet(pb_api)
-
-# initiate logging
-logg = Log('severe_weather', p.log_dir, 'sevweather', 'INFO')
-logg.debug('Logger initiated.')
 
 # set location for query (home)
 loc = p.home_loc

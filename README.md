@@ -141,7 +141,7 @@ quit()
 ```
 ```bash
 # Then, update it
-sudo pip install --upgrade pyserial
+sudo pip3 install --upgrade pyserial
 ```
 
 ## Tools <a id="tools"></a>
@@ -155,6 +155,7 @@ Found in [setup/git_highlighter.sh](setup/git_highlighter.sh)
 ```bash
 /var/log/syslog
 ```
+
 ## Crontab Tasks <a id="crontab_tasks"></a>
 
 #### Home Server
@@ -180,9 +181,6 @@ As some scripts will attempt to pull or save information to certain directories,
 │   └───/logging
 │   └───/primary
 │   └───/sensors
-│   │   └───/temp
-│   │   └───/light
-│   │   └───/sound
 │   └───/setup
 │   └───/signals
 │   └───/switches

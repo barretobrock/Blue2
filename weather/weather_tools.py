@@ -26,8 +26,10 @@ from primary.maintools import Paths
 class DarkSkyWeather:
     """
     Use Dark Sky API to get weather forecast
+    Args for __init__:
+        day_text: str, 'TODAY' or 'TOMORROW'
+        latlong: str, format: "latitude,longitude"
     """
-
     def __init__(self, day_text, latlong='59.4049,24.6768'):
         self.day_text = day_text
         self.latlong = latlong
@@ -36,12 +38,18 @@ class DarkSkyWeather:
         self.DARK_SKY_URL = "{}/{}/{}?units=si&exclude=currently,flags".format(self.url_prefix, self.DARK_SKY_API, self.latlong)
 
     def get_data(self):
+        """Returns weather data on given location"""
         # get weather forecast from dark sky api
         darksky = urlopen(self.DARK_SKY_URL).read().decode('utf-8')
         data = json.loads(darksky)
         return data
 
     def day_summary(self, hour_str_list):
+        """
+        Creates summary of day's weather for location
+        Args:
+            hour_str_list: list of str, hours of day for specific temperatures
+        """
         now = dtt.today()
         data = self.get_data()
         hourly_weather = data.get('hourly').get('data')
