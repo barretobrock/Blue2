@@ -24,21 +24,29 @@ from logger.pylogger import Log
 
 def is_engine_on(conn):
     """Determines if engine is running"""
+    val = try_collect(conn, 'RPM')
+    if val is None:
+        return False
+    else:
+        return True
+
+
+def try_collect(conn, cmd):
+    """
+    Attempts to collect data on the particular command.
+    Args:
+        conn: obd-class connection
+        cmd: str, type of metric
+    """
     try:
-        response = conn.query(obd.commands.RPM)
+        response = conn.query(obd.commands[cmd])
         rval = response.value.magnitude
     except:
-        rval = 0
-
-    if rval is None:
-        rval = 0
-
-    if rval > 0:
-        return True
-    return False
+        rval = None
+    return rval
 
 
-mesurement_interval = 1 # time to wait between measurements
+mesurement_interval = 1  # time to wait between measurements
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
@@ -70,15 +78,7 @@ while time.time() < end_time:
                 line_dict = OrderedDict(())
                 line_dict['TIMESTAMP'] = dt.now().isoformat()
                 for d in cmd_list:
-                    try:
-                        response = connection.query(obd.commands[d])
-                        rval = response.value.magnitude
-                    except:
-                        rval = None
-                        pass
-
-                    if rval is None:
-                        rval = 0
+                    rval = try_collect(connection, d)
 
                     # Append to dictionary
                     line_dict[d] = rval
