@@ -62,17 +62,26 @@ t = time.time()
 end_time = t + 60 * 5   # Run for five minutes
 end_time -= 5   # Take off five seconds for processing
 
-connection = obd.OBD()
+try:
+    connection = obd.OBD()
+except:
+    pass
+
 while time.time() < end_time:
     if not connection.is_connected():
         # Make sure bluetooth is connected. Otherwise try connecting to it
         # Attempt to make connection.
-        connection = obd.OBD()
+        try:
+            connection = obd.OBD()
+        except:
+            pass
+
         if not connection.is_connected():
             # Sleep if still no success
             time.sleep(mesurement_interval)
     else:
         if is_engine_on(connection):
+            logg.debug("Engine detected as 'ON'. Beginning recording")
             # If engine is on, being recording...
             while is_engine_on(connection) and time.time() < end_time:
                 line_dict = OrderedDict(())
