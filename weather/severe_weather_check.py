@@ -26,7 +26,7 @@ from comm.commtools import PBullet
 
 p = Paths()
 # initiate logging
-logg = Log('severe_weather', p.log_dir, 'sevweather', 'INFO')
+logg = Log('severe_weather', p.log_dir, 'sevweather', 'DEBUG')
 logg.debug('Logger initiated.')
 
 ds_api = p.key_dict['darksky_api']
