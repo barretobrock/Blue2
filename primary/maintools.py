@@ -107,7 +107,7 @@ class FileSCP:
         mkey = self.pmiko.RSAKey.from_private_key_file(privatekey_path)
 
         self.ssh = self.pmiko.SSHClient()
-        self.ssh.load_host_keys()
+        self.ssh.load_system_host_keys()
         self.ssh.set_missing_host_key_policy(self.pmiko.AutoAddPolicy())
         # Connect to server using private key
         self.ssh.connect(server_ip, username=server_hostname, pkey=mkey)

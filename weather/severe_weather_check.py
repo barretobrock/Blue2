@@ -51,7 +51,11 @@ data = json.loads(darkskydata)
 alerts = data.get('alerts')
 if alerts is not None:
     logg.debug('Alerts fetched:{}'.format(len(alerts)))
-    prev_alerts = csvhelp.csv_to_ordered_dict(prev_alerts_path)
+    if os.path.exists(prev_alerts_path):
+        prev_alerts = csvhelp.csv_to_ordered_dict(prev_alerts_path)
+    else:
+        prev_alerts = None
+
     for alert in alerts:
         title = alert['title']
         regions = alert['regions']
@@ -59,19 +63,20 @@ if alerts is not None:
         time_reported = dtools.unix_to_string(alert['time'], '%Y%m%d_%H%M%S')
         expires = dtools.unix_to_string(alert['expires'], '%Y%m%d_%H%M%S')
         expires_formatted = dtools.unix_to_string(alert['expires'], '%Y-%m-%d %H:%M:%S')
-        if not any(['{}-{}'.format(d['title'], d['reported']) == '{}-{}'.format(title, time_reported) for d in prev_alerts]):
-            # if no matches in previous alerts file...
-            # ... add new alerts to that file and send message
-            new_alert_dict = OrderedDict((
-                ('title', title),
-                ('reported', time_reported),
-                ('expiration', expires),
-            ))
-            pb.send_message('{} until {}'.format(title, expires_formatted), desc)
-            # Add new alert dict to list
-            prev_alerts.append(new_alert_dict)
-            # Rewrite file to disk
-            csvhelp.ordered_dict_to_csv(prev_alerts, prev_alerts_path)
+        if prev_alerts is not None:
+            if not any(['{}-{}'.format(d['title'], d['reported']) == '{}-{}'.format(title, time_reported) for d in prev_alerts]):
+                # if no matches in previous alerts file...
+                # ... add new alerts to that file and send message
+                new_alert_dict = OrderedDict((
+                    ('title', title),
+                    ('reported', time_reported),
+                    ('expiration', expires),
+                ))
+                pb.send_message('{} until {}'.format(title, expires_formatted), desc)
+                # Add new alert dict to list
+                prev_alerts.append(new_alert_dict)
+                # Rewrite file to disk
+                csvhelp.ordered_dict_to_csv(prev_alerts, prev_alerts_path)
 else:
     logg.debug('No alerts found, ending.')
 
