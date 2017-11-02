@@ -43,18 +43,33 @@ def grab_timestamp(daily_df, activity, location, avg_time_str):
     # Filter dataframe basec on activity and location
     filtered_df = daily_df[(daily_df['activity'] == activity) & (daily_df['Location'] == location)]
 
+    dd = daily_df.reset_index()
+
     if not filtered_df.empty:
         # If multiple results in filtered dataframe, apply logic to choose correctly:
         #   activity = 'left': pick first entry
         #   activity = 'arrived': pick last entry
         if filtered_df.shape[0] > 1:
             if activity == 'left':
-                xrow = 0
+                if 'WORK' in location:
+                    # Leaving work = pick last entry
+                    xrow = dd.loc[(dd['Location'] == location) & (dd['activity'] == activity)].index.tolist()[-1]
+                elif 'HOME' in location:
+                    # Leaving home = pick first entry
+                    xrow = dd.loc[(dd['Location'] == location) & (dd['activity'] == activity)].index.tolist()[0]
             elif activity == 'arrived':
-                xrow = filtered_df.shape[0] - 1
+                if 'WORK' in location:
+                    # Arriving to work = pick first entry
+                    xrow = dd.loc[(dd['Location'] == location) & (dd['activity'] == activity)].index.tolist()[0]
+                elif 'HOME' in location:
+                    # Arriving home = pick first home entry after work
+                    last_work_x = dd.loc[(dd['Location'] == 'BAO_WORK') & (dd['activity'] == 'left')].index.tolist()[-1]
+                    last_work_ts = dd['timestamp'][last_work_x]
+                    xrow = dd.loc[(dd['Location'] == location) & (dd['activity'] == activity) &
+                                  (dd['timestamp'] > last_work_ts)].index.tolist()[0]
+            tmstmp = dd.iloc[xrow]['timestamp']
         else:
-            xrow = 0
-        tmstmp = filtered_df.iloc[xrow]['timestamp']
+            tmstmp = filtered_df.iloc[0]['timestamp']
     else:
         tmstmp = pd.to_datetime(daily_df.iloc[0]['date']).replace(hour=avg_time.hour, minute=avg_time.minute)
         adjusted = True
