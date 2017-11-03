@@ -46,12 +46,13 @@ def try_collect(conn, cmd):
     return rval
 
 
-mesurement_interval = 1  # time to wait between measurements
-sleep_interval = 10 # time to wait in seconds between "engine pings"
+measurement_interval = 1  # time to wait between measurements
+sleep_interval = 10  # time to wait in seconds between "engine pings"
 
 p = Paths()
 logg = Log('honda.obd', p.log_dir, 'obd_logger', log_lvl="DEBUG")
 logg.debug('Logging initiated')
+
 chelp = CSVHelper()
 # Set path to write file to
 save_path = os.path.join(p.data_dir, 'obd_results_{}.csv'.format(dt.now().strftime('%Y%m%d_%H%M%S')))
@@ -101,7 +102,7 @@ while time.time() < end_time:
                 # Append line of data to main dictionary
                 result_dicts.append(line_dict)
                 # Wait a second before continuing
-                time.sleep(mesurement_interval)
+                time.sleep(measurement_interval)
 
             logg.debug('Loop ended. Writing file.')
             # Save file

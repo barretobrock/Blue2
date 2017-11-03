@@ -92,6 +92,7 @@ def dow_boxplot(df, data_col, dow_col, save_dir, incl_weekend=False, plot_online
 
 
 p = Paths()
+
 logg = Log('commute.grapher', p.log_dir, 'commute', log_lvl="DEBUG")
 logg.debug('Log initiated')
 

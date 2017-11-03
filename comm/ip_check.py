@@ -22,8 +22,10 @@ from logger.pylogger import Log
 
 p = Paths()
 logg = Log('autopi.ip', p.log_dir, 'autopi_ipaddr', log_lvl="DEBUG")
-inet = Inet()
 logg.debug('Log initiated')
+
+inet = Inet()
+
 pb = PBullet(p.key_dict['pushbullet_api'])
 
 with open(p.ip_path) as f:

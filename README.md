@@ -161,7 +161,7 @@ Found in [setup/git_highlighter.sh](setup/git_highlighter.sh)
 #### Home Server
 ```
 */5 * * * * /usr/bin/python3 ~/blue2/weather/severe_weather_check.py
-*/10 07-20 * * 1-5 /usr/bin/python3 ~/blue2/comm/commute_calc.py
+*/10 07-20 * * 1-5 /usr/bin/python3 ~/blue2/agg/commute_calc.py
 10 0 * * * /usr/bin/python3 ~/blue2/agg/obd_compacter.py
 ```
 #### autoPi
