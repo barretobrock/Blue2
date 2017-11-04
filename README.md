@@ -15,6 +15,7 @@ Projects include, but are not limited to:
         1. [Pushbullet](#pushbullet)
         1. [Pandas](#pandas)
         1. [Plotly](#plotly)
+        1. [Tweepy](#tweepy)
         1. [Google Client Library](#google_client_library)
         1. [OBD2 for Python](#python-obd)
     1. [OBD over Bluetooth](#obd_setup)
@@ -91,6 +92,11 @@ sudo apt-get install python3-pandas
 #### Plotly <a id="plotly"></a>
 ```bash
 sudo pip3 install plotly
+```
+
+#### Tweepy <a id="tweepy"></a>
+```bash
+sudo pip3 install tweepy
 ```
 
 #### Google Client Library and support modules (installed on home server computer for now) <a id="google_client_library"></a>

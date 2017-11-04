@@ -13,7 +13,6 @@ from email.mime.base import MIMEBase
 from email import encoders
 import mimetypes
 from smtplib import SMTP
-from pushbullet import PushBullet
 import socket
 import os
 
@@ -25,8 +24,10 @@ class PBullet:
         api: str, Pushbullet API key
     """
     def __init__(self, api):
+        self.pushbullet = __import__('pushbullet')
+
         self.api = api
-        self.pb = PushBullet(self.api)
+        self.pb = self.pushbullet.PushBullet(self.api)
 
     def send_message(self, title, message):
         """Sends a message"""
@@ -189,5 +190,4 @@ class DomoticzComm:
         """Switches on a group based on its id"""
         url = '{}&param=switchscene&idx={}&switchcmd=On'.format(self.prefix_url, group_id)
         subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
-
 
