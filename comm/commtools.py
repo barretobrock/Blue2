@@ -191,3 +191,60 @@ class DomoticzComm:
         url = '{}&param=switchscene&idx={}&switchcmd=On'.format(self.prefix_url, group_id)
         subprocess.check_call(['curl', '-s', '-i', '-H', self.curl_type, url])
 
+
+class Twitter:
+    def __init__(self, key_dict):
+        self.twp = __import__('tweepy')
+        # Import keys
+        self.CONSUMER_KEY = key_dict['consumer_key']
+        self.CONSUMER_SECRET = key_dict['consumer_secret']
+        self.ACCESS_KEY = key_dict['access_key']
+        self.ACCESS_SECRET = key_dict['access_secret']
+
+    def initiate(self):
+        auth = self.twp.OAuthHandler(self.CONSUMER_KEY, self.CONSUMER_SECRET)
+        auth.set_access_token(self.ACCESS_KEY, self.ACCESS_SECRET)
+        api = self.twp.API(auth)
+        return api
+
+    def get_messages(self):
+        api = self.initiate()
+        msgs = api.direct_messages()
+        return msgs
+
+    def get_followers(self):
+        api = self.initiate()
+        followers = api.followers()
+        return followers
+
+    def post(self, text, log=None):
+        api = self.initiate()
+        if text != "":
+            if len(text) > 140:
+                text = text[:140]
+            try:
+                api.update_status(status=text)
+            except:
+                if log is not None:
+                    log.exception('Failed to post tweet.')
+                else:
+                    pass
+
+    def send_message(self, user_id, text):
+        api = self.initiate()
+        if text != "":
+            api.send_direct_message(user_id=user_id, text=text)
+
+    def delete_tweet(self, datetime_lim, containing=""):
+        api = self.initiate()
+        timeline = self.twp.Cursor(api.user_timeline).items()
+        for tweet in timeline:
+            if tweet.created_at < datetime_lim:
+                if containing != "":
+                    if containing in tweet.text:
+                        print("Destroying {}\n{}".format(tweet.id, tweet.text))
+                        api.destroy_status(tweet.id)
+                else:
+                    print("Destroying {}\n{}".format(tweet.id, tweet.text))
+                    api.destroy_status(tweet.id)
+

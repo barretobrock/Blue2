@@ -16,6 +16,8 @@ Projects include, but are not limited to:
         1. [Pandas](#pandas)
         1. [Plotly](#plotly)
         1. [Tweepy](#tweepy)
+        1. [Markovify](#markovify)
+        1. [Beautiful Soup 4](#bs4)
         1. [Google Client Library](#google_client_library)
         1. [OBD2 for Python](#python-obd)
     1. [OBD over Bluetooth](#obd_setup)
@@ -23,6 +25,7 @@ Projects include, but are not limited to:
     1. [Git Highlighter](#git_highlighter)
 1. [Troubleshooting](#troubleshooting)
     1. [Accessing Crontab logs](#crontab_logs)
+    1. [Selenium in crontab](#selenium_crontab)
 1. [Crontab Tasks](#crontab_tasks)
 1. [Repo Structure](#structure)
 
@@ -99,6 +102,16 @@ sudo pip3 install plotly
 sudo pip3 install tweepy
 ```
 
+#### Markovify <a id="markovify"></a>
+```bash
+sudo pip3 install markovify
+```
+
+#### Beautiful Soup 4 <a id="bs4"></a>
+```bash
+sudo apt-get install python3-bs4
+```
+
 #### Google Client Library and support modules (installed on home server computer for now) <a id="google_client_library"></a>
 Follow instructions from [this link](https://www.twilio.com/blog/2017/02/an-easy-way-to-read-and-write-to-a-google-spreadsheet-in-python.html)
 ```bash
@@ -157,9 +170,15 @@ Found in [setup/git_highlighter.sh](setup/git_highlighter.sh)
 
 ## Troubleshooting <a id="troubleshooting"></a>
 
-### Access crontab logs <a id="crontab_logs"></a>
+### Accessing crontab logs <a id="crontab_logs"></a>
 ```bash
 /var/log/syslog
+```
+
+### Running Selenium scripts in crontab <a id="selenium_crontab"></a>
+```bash
+# Crontab example
+* * * * * export DISPLAY=:0; /usr/bin/python3 ~/blue2/...
 ```
 
 ## Crontab Tasks <a id="crontab_tasks"></a>
