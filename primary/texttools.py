@@ -2,21 +2,37 @@
 # -*- coding: utf-8 -*-
 import requests
 import re
+from random import randint
 
 
 class MarkovText:
-    def __init__(self, bulk_text):
+    def __init__(self, bulk_text, limit=0):
         self.mkov = __import__('markovify')
         if isinstance(bulk_text, list):
             # Multiple models
             models = []
             for i in bulk_text:
+                if 0 < limit < len(i):
+                    # If character limit, randomly select group of text
+                    # Set range to randomly select text chunk
+                    max_char = len(i) - limit
+                    min_char = limit
+                    i_char = randint(min_char, max_char)
+                    i = i[i_char:i_char + limit]
+
                 m = self.mkov.Text(i)
                 models.append(m)
             self.model = self.mkov.combine(models)
         if isinstance(bulk_text, dict):
             models = []
             for i in list(bulk_text.values()):
+                if 0 < limit < len(i):
+                    # If character limit, randomly select group of text
+                    # Set range to randomly select text chunk
+                    max_char = len(i) - limit
+                    min_char = limit
+                    i_char = randint(min_char, max_char)
+                    i = i[i_char:i_char + limit]
                 m = self.mkov.Text(i)
                 models.append(m)
             self.model = self.mkov.combine(models)
