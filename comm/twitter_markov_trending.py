@@ -49,4 +49,4 @@ txt = ' '.join(txt_list)
 mk = MarkovText(txt)
 post_list = mk.generate_n_sentences(10, char_limit)
 
-tw.update_status(post_list[3])
+tw.update_status(post_list[randint(0, 9)])
