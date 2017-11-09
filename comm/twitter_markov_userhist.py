@@ -24,30 +24,40 @@ from comm.commtools import Twitter
 
 
 p = Paths()
-logg = Log('twitkov.trending', p.log_dir, 'twitkov')
+logg = Log('twitkov.userhist', p.log_dir, 'twitkov')
 logg.debug('Logging initiated')
 tweepy_dict = eval(p.key_dict['tweepy_api'])
 tw = Twitter(tweepy_dict)
 tc = TextCleaner()
 
 char_limit = 140
+markov_dir = os.path.join(p.data_dir, 'markov')
+# Get user id for user
+users = tw.lookup_users(screen_names=['realDonaldTrump'])
+user_id = users[0].id
 
-# Get current trending info for US
-trends = tw.trends_place(23424977)[0]['trends']
-# Randomly pick a trend in top 20
-if len(trends) > 50:
-    trend = trends[randint(0, 50)]
-else:
-    trend = trends[randint(0, len(trends))]
+alltweets = []
+new_tweets = tw.user_timeline(user_id=user_id, count=200)
+alltweets += new_tweets
+oldest = alltweets[-1].id - 1
 
-# Gather tweets with given hashtag
-n_tweets = 1000
-tweets = tweepy.Cursor(tw.search, q=trend['name']).items(n_tweets)
+while len(new_tweets) > 0:
+    new_tweets = tw.user_timeline(user_id=user_id, count=200, max_id=oldest)
+    alltweets += new_tweets
+    oldest = alltweets[-1].id - 1
 
 txt_list = []
-for t in range(n_tweets):
-    txt_list.append(tweets.next().text)
+for tweet in alltweets:
+    txt_list.append(tweet.text)
 txt = ' '.join(txt_list)
+
+with open(os.path.join(markov_dir, 'cooking1.txt')) as f:
+    cooktxt = f.read()
+
+txt = [txt, cooktxt]
+
+with open(os.path.join(markov_dir, 'trumptweets.txt'), 'w') as f:
+    f.write(txt)
 
 # Create Markov model from tweets
 mk = MarkovText(txt)

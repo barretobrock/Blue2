@@ -16,32 +16,28 @@ else:
     sys.path.insert(0, os.path.join(cur_dir, 'blue2'))
 # import custom modules
 from random import randint
+from logger.pylogger import Log
 from primary.maintools import Paths
-from primary.texttools import MarkovText, WebExtractor, TextCleaner
+from primary.texttools import MarkovText, TextCleaner
 from comm.commtools import Twitter
 
 
 p = Paths()
+logg = Log('twitkov.txtprocess', p.log_dir, 'twitkov')
+logg.debug('Logging initiated')
+
 tweepy_dict = eval(p.key_dict['tweepy_api'])
 tw = Twitter(tweepy_dict)
-webex = WebExtractor()
-tcln = TextCleaner()
+tc = TextCleaner()
 
 char_limit = 140
 # Read in text sources
 markov_dir = os.path.join(p.data_dir, 'markov')
 
-# Extract text from link
-#txt_list = webex.get_text('https://www.infowars.com/transcript-alex-jones-secede-from-the-new-world-order/')
-#txt = ' '.join([x.text for x in txt_list])
-
-#with open(os.path.join(markov_dir, 'ajones1.txt'), 'w') as f:
-#    f.write(txt)
-
 fpaths = [os.path.join(markov_dir, x) for x in os.listdir(markov_dir)]
 
 txt = {}
-for f in fpaths[:4]:
+for f in fpaths:
     k = os.path.basename(f).replace('.txt', '')
     with open(f, 'r') as f:
         txt[k] = f.read()
@@ -51,5 +47,8 @@ mk = MarkovText(txt, limit=5000)
 sentences = mk.generate_n_sentences(50, char_limit)
 
 sentence = sentences[randint(0, len(sentences) - 1)]
+sentence = tc.sentence_filler(sentence, char_limit)
 
-tw.update_status(sentence)
+tw.post(sentence)
+
+logg.close()

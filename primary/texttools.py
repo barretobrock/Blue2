@@ -42,7 +42,9 @@ class MarkovText:
     def generate_n_sentences(self, n, char_limit=0):
         sentences = []
         for i in range(n):
-            sentences.append(self.generate_sentence(char_limit))
+            s = self.generate_sentence(char_limit)
+            if len(s) >= char_limit / 2:
+                sentences.append(s)
         return sentences
 
     def generate_sentence(self, char_limit=0):
@@ -98,4 +100,32 @@ class TextCleaner:
         space_fixes_rep = ['. ', '? ', '! ']
         for s in range(0, len(space_fixes_find)):
             text = re.sub(space_fixes_find[s], space_fixes_rep[s], re.sub(r' +', ' ', text))
+        return text
+
+    def sentence_filler(self, text, limit):
+        if len(text) < limit:
+            diff = limit - len(text)
+            if diff > 7:
+                # continue if difference is greater than space needed for hashtags
+                splts = text.split(sep=' ')
+                words = []
+                for word in splts:
+                    wd = word.replace('.', '')
+                    if len(wd) > 3 and wd not in words:
+                        words.append(wd)
+
+                # sort word list by word size
+                words = sorted(words, key=len, reverse=True)
+                hashtags = ''
+                # Go through top five words, add them as hashtag
+
+                c = 0
+                while c < 50:
+                    # try up to 50 times
+                    addtag = ' #' + words[randint(0, len(words) - 1)]
+                    if len(hashtags) + len(addtag) <= diff:
+                        # if tags with new hashtag fits, add it
+                        hashtags += addtag
+                    c += 1
+                text += hashtags
         return text

@@ -213,10 +213,10 @@ class Twitter(API):
         followers = self.followers()
         return followers
 
-    def post(self, text, log=None):
+    def post(self, text, log=None, char_limit=140):
         if text != "":
-            if len(text) > 140:
-                text = text[:140]
+            if len(text) > char_limit:
+                text = text[:char_limit]
             try:
                 self.update_status(status=text)
             except:
