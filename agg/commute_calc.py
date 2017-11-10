@@ -24,7 +24,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
 
-def grab_timestamp(daily_df, activity, location, avg_time_str):
+def grab_timestamp(daily_df, activity, location, avg_time):
     """
     Searches through dataframe for certain activity at certain location.
     If no timestamp found for given combination, the average time string is processed
@@ -32,12 +32,11 @@ def grab_timestamp(daily_df, activity, location, avg_time_str):
         daily_df: pandas.DataFrame of day's activities at given locations
         activity: str, 'left' or 'arrived'
         location: str, location of activity
-        avg_time_str: str, HH:MM of when activity at location takes place on average
+        avg_time: pandas.Timestamp, HH:MM of when activity at location takes place on average
     Returns:
         dictionary including timestamp and boolean whether the average time
             was used instead of the actual time.
     """
-    avg_time = pd.to_datetime(avg_time_str, format="%H:%M")
     adjusted = False
 
     # Filter dataframe basec on activity and location
@@ -70,10 +69,52 @@ def grab_timestamp(daily_df, activity, location, avg_time_str):
             tmstmp = dd.iloc[xrow]['timestamp']
         else:
             tmstmp = filtered_df.iloc[0]['timestamp']
+    elif daily_df.empty:
+        # Supplied dataframe is empty, so nothing can be done here
+        return None
     else:
         tmstmp = pd.to_datetime(daily_df.iloc[0]['date']).replace(hour=avg_time.hour, minute=avg_time.minute)
         adjusted = True
     return {'tstamp': tmstmp, 'adjusted': adjusted}
+
+
+def compile_day_timestamps(df):
+    #today = df['date'].iloc[0]
+    home_leave_norm = pd.to_datetime('07:35', format="%H:%M")
+    work_arrive_norm = pd.to_datetime('08:25', format="%H:%M")
+    work_leave_norm = pd.to_datetime('16:45', format="%H:%M")
+    home_arrive_norm = pd.to_datetime('17:30', format="%H:%M")
+
+    work_commute_norm = work_arrive_norm - home_leave_norm
+    home_commute_norm = home_arrive_norm - work_leave_norm
+
+    # Get timestamps
+    ts_left_home = grab_timestamp(df, 'left', 'HOME', home_leave_norm)
+    ts_arrived_work = grab_timestamp(df, 'arrived', 'BAO_WORK', work_arrive_norm)
+    ts_left_work = grab_timestamp(df, 'left', 'BAO_WORK', work_leave_norm)
+    ts_arrived_home = grab_timestamp(df, 'arrived', 'HOME', home_arrive_norm)
+
+    # if ending timestamp is adjusted, readjust beginning and vice versa
+    # Work commute
+    if ts_left_home['adjusted'] and not ts_arrived_work['adjusted']:
+        ts_left_home['tstamp'] = ts_arrived_work['tstamp'] - work_commute_norm
+    elif not ts_left_home['adjusted'] and ts_arrived_work['adjusted']:
+        ts_arrived_work['tstamp'] = ts_left_home['tstamp'] + work_commute_norm
+    # Home commute
+    if ts_left_work['adjusted'] and not ts_arrived_home['adjusted']:
+        ts_left_work['tstamp'] = ts_arrived_home['tstamp'] - home_commute_norm
+    elif not ts_left_work['adjusted'] and ts_arrived_home['adjusted']:
+        ts_arrived_home['tstamp'] = ts_left_work['tstamp'] + home_commute_norm
+
+    # Calculate minutes for commute, hours for time worked
+    d = {
+        'work_commute': pd.Timedelta(ts_arrived_work['tstamp'] - ts_left_home['tstamp']).seconds / 60,
+        'adjusted_work_commute': any([ts_left_home['adjusted'], ts_arrived_work['adjusted']]),
+        'hours_at_work': pd.Timedelta(ts_left_work['tstamp'] - ts_arrived_work['tstamp']).seconds / 60 / 60,
+        'home_commute': pd.Timedelta(ts_arrived_home['tstamp'] - ts_left_work['tstamp']).seconds / 60,
+        'adjusted_home_commute': any([ts_left_work['adjusted'], ts_arrived_home['adjusted']]),
+    }
+    return d
 
 
 def get_metrics(df, todaydf, col_name, incl_adjusted):
@@ -230,16 +271,15 @@ if last_update < last_entry:
         if int(daily_commute_df.loc[i, 'dow']) < 6:
             # work day
             df = commute_df[commute_df['date'] == daily_commute_df.loc[i, 'date']]
-            time_left_home = grab_timestamp(df, 'left', 'HOME', '07:35')
-            time_arrived_work = grab_timestamp(df, 'arrived', 'BAO_WORK', '08:25')
-            time_left_work = grab_timestamp(df, 'left', 'BAO_WORK', '16:45')
-            time_arrived_home = grab_timestamp(df, 'arrived', 'HOME', '17:30')
-            # Calculate minutes for work commute
-            daily_commute_df.loc[i, 'work_commute'] = pd.Timedelta(time_arrived_work['tstamp'] - time_left_home['tstamp']).seconds / 60
-            daily_commute_df.loc[i, 'adjusted_work_commute'] = any([time_left_home['adjusted'], time_arrived_work['adjusted']])
-            daily_commute_df.loc[i, 'hours_at_work'] = pd.Timedelta(time_left_work['tstamp'] - time_arrived_work['tstamp']).seconds / 60 / 60
-            daily_commute_df.loc[i, 'home_commute'] = pd.Timedelta(time_arrived_home['tstamp'] - time_left_work['tstamp']).seconds / 60
-            daily_commute_df.loc[i, 'adjusted_home_commute'] = any([time_left_work['adjusted'], time_arrived_home['adjusted']])
+            if not df.empty:
+                ts_dict = compile_day_timestamps(df)
+
+                # Calculate minutes for work commute
+                daily_commute_df.loc[i, 'work_commute'] = ts_dict['work_commute']
+                daily_commute_df.loc[i, 'adjusted_work_commute'] = ts_dict['adjusted_work_commute']
+                daily_commute_df.loc[i, 'hours_at_work'] = ts_dict['hours_at_work']
+                daily_commute_df.loc[i, 'home_commute'] = ts_dict['home_commute']
+                daily_commute_df.loc[i, 'adjusted_home_commute'] = ts_dict['adjusted_home_commute']
 
     # Save csv file
     logg.debug('Writing to csv.')
