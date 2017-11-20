@@ -58,6 +58,6 @@ sentences = mk.generate_n_sentences(50, char_limit)
 sentence = sentences[randint(0, len(sentences) - 1)]
 sentence = tc.sentence_filler(sentence, char_limit)
 
-tw.post(sentence)
+tw.post(sentence, char_limit=char_limit)
 
 logg.close()
