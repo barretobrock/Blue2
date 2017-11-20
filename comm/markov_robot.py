@@ -30,7 +30,7 @@ tweepy_dict = eval(p.key_dict['tweepy_api'])
 tw = Twitter(tweepy_dict)
 tc = TextCleaner()
 
-char_limit = 140
+char_limit = 280
 # Read in text sources
 markov_dir = os.path.join(p.data_dir, 'markov')
 
@@ -42,7 +42,16 @@ for f in fpaths:
     with open(f, 'r') as f:
         txt[k] = f.read()
 
-mk = MarkovText(txt, limit=5000)
+choose_txt = [
+    txt['debian'],
+    txt['drawing'],
+    txt['cooking2'],
+    txt['conspiracy_list'] + txt['ajones1'],
+    txt['compsci_workshops'],
+    txt['romance1'],
+]
+
+mk = MarkovText(choose_txt, limit=30000)
 
 sentences = mk.generate_n_sentences(50, char_limit)
 
