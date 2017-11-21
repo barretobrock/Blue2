@@ -51,7 +51,14 @@ choose_txt = [
     txt['romance1'],
 ]
 
-mk = MarkovText(choose_txt, limit=30000)
+# This seems to break sometimes, so perform a loop of up to five times
+for x in range(0, 5):
+    try:
+        mk = MarkovText(choose_txt, limit=30000)
+        break
+    except:
+        pass
+
 
 sentences = mk.generate_n_sentences(50, char_limit)
 

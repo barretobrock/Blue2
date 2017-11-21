@@ -30,7 +30,7 @@ tweepy_dict = eval(p.key_dict['tweepy_api'])
 tw = Twitter(tweepy_dict)
 tc = TextCleaner()
 
-char_limit = 140
+char_limit = 280
 
 # Get current trending info for US
 trends = tw.trends_place(23424977)[0]['trends']
@@ -41,12 +41,15 @@ else:
     trend = trends[randint(0, len(trends))]
 
 # Gather tweets with given hashtag
-n_tweets = 1000
+n_tweets = 2000
 tweets = tweepy.Cursor(tw.search, q=trend['name']).items(n_tweets)
 
 txt_list = []
 for t in range(n_tweets):
-    txt_list.append(tweets.next().text)
+    try:
+        txt_list.append(tweets.next().text)
+    except:
+        pass
 txt = ' '.join(txt_list)
 
 # Create Markov model from tweets
@@ -59,4 +62,4 @@ if len(post_txt + trend['name']) < char_limit:
     post_txt = ' '.join([post_txt, trend['name']])
 
 post_txt = tc.sentence_filler(post_txt, char_limit)
-tw.post(post_txt)
+tw.post(post_txt, char_limit=char_limit)
