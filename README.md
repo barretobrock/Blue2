@@ -17,6 +17,7 @@ Projects include, but are not limited to:
         1. [Plotly](#plotly)
         1. [Tweepy](#tweepy)
         1. [Markovify](#markovify)
+        1. [Speedtest](#speedtest)
         1. [Beautiful Soup 4](#bs4)
         1. [Google Client Library](#google_client_library)
         1. [OBD2 for Python](#python-obd)
@@ -105,6 +106,11 @@ sudo pip3 install tweepy
 #### Markovify <a id="markovify"></a>
 ```bash
 sudo pip3 install markovify
+```
+
+#### Speedtest <a id="speedtest"></a>
+```bash
+sudo pip3 install speedtest-cli
 ```
 
 #### Beautiful Soup 4 <a id="bs4"></a>

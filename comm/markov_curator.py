@@ -15,55 +15,60 @@ else:
     # otherwise set system paths based on project directory in PyCharm
     sys.path.insert(0, os.path.join(cur_dir, 'blue2'))
 # import custom modules
-import tweepy
 from random import randint
 from logger.pylogger import Log
 from primary.maintools import Paths
 from primary.texttools import MarkovText, TextCleaner
 from comm.commtools import Twitter
+import pandas as pd
 
 
 p = Paths()
-logg = Log('twitkov.userhist', p.log_dir, 'twitkov')
+logg = Log('twitkov.txtprocess', p.log_dir, 'twitkov')
 logg.debug('Logging initiated')
+
 tweepy_dict = eval(p.key_dict['tweepy_api'])
 tw = Twitter(tweepy_dict)
 tc = TextCleaner()
 
 char_limit = 280
+# Read in text sources
 markov_dir = os.path.join(p.data_dir, 'markov')
-# Get user id for user
-users = tw.lookup_users(screen_names='quotes')
-rand_usr = randint(0, len(users))
-users_ids = users.ids()
-username = users[rand_usr].screen_name
-user_id = users_ids[rand_usr]
 
-alltweets = []
-new_tweets = tw.user_timeline(user_id=user_id, count=200)
-alltweets += new_tweets
-oldest = alltweets[-1].id - 1
+fpaths = [os.path.join(markov_dir, x) for x in os.listdir(markov_dir)]
 
-while len(new_tweets) > 0:
-    new_tweets = tw.user_timeline(user_id=user_id, count=200, max_id=oldest)
-    alltweets += new_tweets
-    oldest = alltweets[-1].id - 1
+txt = {}
+for f in fpaths:
+    k = os.path.basename(f).replace('.txt', '')
+    with open(f, 'r') as f:
+        txt[k] = f.read()
 
-txt_list = []
-for tweet in alltweets:
-    txt_list.append(tweet.text)
-txt = ' '.join(txt_list)
+choose_txt = [
+    txt['debian'],
+    txt['drawing'],
+    txt['cooking2'],
+    txt['conspiracy_list'] + txt['ajones1'],
+    txt['compsci_workshops'],
+    txt['romance1'],
+]
 
-with open(os.path.join(markov_dir, 'cooking1.txt')) as f:
-    cooktxt = f.read()
+# This seems to break sometimes, so perform a loop of up to five times
+for x in range(0, 5):
+    try:
+        mk = MarkovText(choose_txt, limit=30000)
+        break
+    except:
+        pass
 
-txt = [txt, cooktxt]
 
-# Create Markov model from tweets
-mk = MarkovText(txt)
-post_list = mk.generate_n_sentences(10, char_limit)
+sentences = mk.generate_n_sentences(100, char_limit)
+sentsdf = pd.DataFrame({'sentences': sentences})
+sentsdf['use'] = ''
+sentsdf.to_csv(os.path.join(p.data_dir, 'sentences.csv'), sep=';')
 
-post_txt = post_list[randint(0, len(post_list) - 1)]
+sentence = sentences[randint(0, len(sentences) - 1)]
+sentence = tc.sentence_filler(sentence, char_limit)
 
-post_txt = tc.sentence_filler(post_txt, char_limit)
-tw.post(post_txt, char_limit=char_limit)
+tw.post(sentence, char_limit=char_limit)
+
+logg.close()
