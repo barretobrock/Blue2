@@ -36,7 +36,7 @@ char_limit = 280
 
 plot_fullpath = os.path.join(p.data_dir, *['plots', plot_path])
 if os.path.exists(plot_fullpath):
-    status_txt = "Results are in for the last 24 hours of bandwidth! #speedtest #bandwidth #download"
+    status_txt = "Results are in for the last 24 hours of bandwidth tests! #speedtest #bandwidth #download"
     tw.update_with_media(plot_fullpath, status=status_txt)
 else:
     logg.debug("Plot picture could not be found. No status update was made.")

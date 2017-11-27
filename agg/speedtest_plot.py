@@ -18,6 +18,7 @@ else:
 from logger.pylogger import Log
 from primary.maintools import Paths
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import dates, rcParams
 import pandas as pd
@@ -27,7 +28,6 @@ p = Paths()
 logg = Log('speedtest.plotter', p.log_dir, 'speedtest')
 logg.debug('Logging initiated')
 
-matplotlib.use('Agg')
 speedtest_data_path = os.path.join(p.data_dir, 'speedtest_data.csv')
 plot_path = 'speedtest24_{}.png'.format(pd.datetime.now().strftime('%Y-%m-%d'))
 # Read in data
@@ -46,18 +46,18 @@ rcParams['xtick.labelsize'] = 'xx-small'
 
 plt.plot(data.TIMESTAMP, data.DOWNLOAD, 'b-')
 
-plt.axhline(y=20, color='r', linestyle=':')
+plt.axhline(y=50, color='r', linestyle=':')
 plt.title('Bandwidth Report (last 24 hours)')
 plt.ylabel('Mbps')
 plt.xlabel('Timestamp')
 
-plt.yticks(range(0, 31, 5))
-plt.ylim(0.0, 30.0)
+plt.yticks(range(0, 55, 10))
+plt.ylim(0.0, 55.0)
 
 current_axes = plt.gca()
 current_figure = plt.gcf()
 
-hfmt = dates.DateFormatter('%d.%M %H:%M')
+hfmt = dates.DateFormatter('%H:%M')
 current_axes.xaxis.set_major_formatter(hfmt)
 current_figure.subplots_adjust(bottom=.25)
 

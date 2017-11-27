@@ -46,6 +46,7 @@ class Paths:
             'pushbullet_api.txt',
             'plotly_api.txt',
             'tweepy_api.txt',
+            'personal_tweepy_api.txt',
         ]
 
         self.key_dict = {}
