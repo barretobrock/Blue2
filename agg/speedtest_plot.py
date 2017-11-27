@@ -17,6 +17,7 @@ else:
 # import custom modules
 from logger.pylogger import Log
 from primary.maintools import Paths
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import dates, rcParams
 import pandas as pd
@@ -26,6 +27,7 @@ p = Paths()
 logg = Log('speedtest.plotter', p.log_dir, 'speedtest')
 logg.debug('Logging initiated')
 
+matplotlib.use('Agg')
 speedtest_data_path = os.path.join(p.data_dir, 'speedtest_data.csv')
 plot_path = 'speedtest24_{}.png'.format(pd.datetime.now().strftime('%Y-%m-%d'))
 # Read in data
