@@ -57,7 +57,7 @@ plt.ylim(0.0, 55.0)
 current_axes = plt.gca()
 current_figure = plt.gcf()
 
-hfmt = dates.DateFormatter('%H:%M')
+hfmt = dates.DateFormatter('%H')
 current_axes.xaxis.set_major_formatter(hfmt)
 current_figure.subplots_adjust(bottom=.25)
 

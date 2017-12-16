@@ -23,6 +23,7 @@ class Paths:
         # ip addresses
         self.gatewaypi_ip = '192.168.0.5'
         self.server_ip = '192.168.0.3'
+        self.webcam_ip = '192.168.0.7'
         self.server_hostname = 'bobrock'
         # directories
         hostname = socket.gethostname()
@@ -47,6 +48,7 @@ class Paths:
             'plotly_api.txt',
             'tweepy_api.txt',
             'personal_tweepy_api.txt',
+            'webcam_api.txt',
         ]
 
         self.key_dict = {}
